@@ -566,3 +566,25 @@ console.log(hasCircularReference(c)); // 输出: false
 ### 单点登录
 
 cookie+同样的一级域名就可以了
+
+### import.meta.env和process.env的区别
+
+import.meta.env 和 process.env 都是用于在 JavaScript 中获取环境变量的方式，但它们之间有一些关键的区别：
+
+作用域：
+
+import.meta.env 是 ES Modules（ECMAScript 模块）的一部分，因此只能在模块范围内使用。它提供了关于模块的环境信息。
+process.env 是 Node.js 的全局对象，在整个 Node.js 应用程序中都可以使用，包括 CommonJS 模块和全局作用域。
+用途：
+
+import.meta.env 主要用于前端开发，特别是在构建工具和打包工具中。它可以用来获取构建时的环境变量，比如在 webpack、Rollup、Vite 等工具中使用。
+process.env 主要用于后端开发，尤其是在 Node.js 应用程序中。它可以用来获取应用程序运行时的环境变量，比如配置数据库连接、API 密钥等。
+数据类型：
+
+import.meta.env 中的环境变量是字符串类型，需要根据需要进行类型转换。
+process.env 中的环境变量也是字符串类型，但通常会包含更多类型的值，比如整数、布尔值等，这取决于环境变量的配置方式。
+使用方法：
+
+在 ES Modules 中，可以直接使用 import.meta.env 访问环境变量，例如 import.meta.env.NODE_ENV。
+在 Node.js 应用程序中，可以直接使用 process.env 访问环境变量，例如 process.env.NODE_ENV。
+总的来说，import.meta.env 和 process.env 都是用于获取环境变量的重要工具，但它们适用于不同的应用场景和环境。import.meta.env 主要用于前端开发和模块化环境，而 process.env 主要用于后端开发和整个 Node.js 应用程序。

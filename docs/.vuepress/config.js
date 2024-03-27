@@ -1,9 +1,15 @@
-import { defaultTheme } from 'vuepress'
+import { viteBundler } from '@vuepress/bundler-vite'
 
-export default {
+import { defaultTheme } from '@vuepress/theme-default'
+
+import { defineUserConfig } from 'vuepress'
+
+export default defineUserConfig({
   title: '',
   description: '啥也没得说',
   base: '/richard-blog/',
+  bundler: viteBundler(),
+
   theme: defaultTheme({
     navbar: [
       { text: 'HTML', link: '/html/' },
@@ -43,38 +49,57 @@ export default {
       { text: '手写代码', link: '/writeCode/' },
       // { text: '代码输出', link: '/代码输出/' },
       { text: '小程序', link: '/wxsp/' },
-      { text: '工程化和性能优化', link: '/engineering/' },
+      {
+        text: '工程化',
+        link: '/engineering/',
+        children: [
+          {
+            text: 'webpack',
+            link: '/engineering/webpack.md'
+          },
+          {
+            text: 'eslint',
+            link: '/engineering/eslint.md'
+          }
+        ]
+      },
       { text: '学习路线', link: '/studyRoute/' },
       { text: '项目', link: '/projectSolution/' },
       { text: '待写', link: '/noWrite/' },
-      { text: '前端监控', link: '/jiankong/' }
+      { text: '前端监控', link: '/jiankong/' },
+      {
+        text: '规范',
+        link: '/standard/',
+        children: [
+          {
+            text: '代码规范',
+            link: '/standard/代码规范.md'
+          },
+          {
+            text: '发布规范',
+            link: '/standard/发布规范.md',
+            activeMatch: '^/standard/发布规范'
+          }
+        ]
+      }
     ],
-    sidebar: 'auto'
-    // sidebar: {
-    //   '/performance/': [
-    //     {
-    //       text: '性能优化',
-    //       collapsible: true,
-    //       children: [
-    //         '/performance/index.md'
-    //       ],
-    //     },
-    //   ],
-
-    //   '/html/': [{children: ['']}],
-    //   '/css/': [{children: ['']}],
-    //   '/js/': [{children: ['']}],
-    //   '/es6/': [{children: ['']}],
-    //   '/vue2/': [{children: ['']}],
-    //   '/vue3/': [{children: ['']}],
-    //   '/browser/': [{children: ['']}],
-    //   '/computerNetwork/': [{children: ['']}],
-    //   '/writeCode/': [{children: ['']}],
-    //   '/wxsp/': [{children: ['']}],
-    //   '/engineering/': [{children: ['']}],
-    //   '/studyRoute/': [{children: ['']}],
-    //   '/projectSolution/': [{children: ['']}],
-    //   '/noWrite/': [{children: ['']}],
-    // },
+    // sidebar: 'auto',
+    sidebar: {
+      '/engineering/': [
+        {
+          text: 'eslint',
+          children: ['/engineering/eslint.md']
+        },
+        {
+          text: 'prettier',
+          children: ['/engineering/prettier.md']
+        },
+        {
+          text: 'webpack',
+          collapsible: true,
+          children: ['/engineering/webpack.md']
+        }
+      ]
+    }
   })
-}
+})
