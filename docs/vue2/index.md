@@ -7,11 +7,11 @@
 **概念：**
 
 - SPA 单页面应用（SinglePage Web Application），指只有一个主页面的应用，一开始只需要加载一次 js、css 等资源。所有内容都包含在主页面，对每一个功能模块组件化。页面跳转，就是切换相关组件，仅仅刷新局部资源。
-- MPA 多页面应用 （MultiPage Application），指有多个独立页面的应用，每个页面必须重复加载 js、css 等相关资源。页面跳转，需要整个页面资源刷新。
 
 优点: 页面切换快,体验好
+缺点：首屏加载慢， SEO不好
 
-**区别：**
+- MPA 多页面应用 （MultiPage Application），指有多个独立页面的应用，每个页面必须重复加载 js、css 等相关资源。页面跳转，需要整个页面资源刷新。
 
 ![775316ebb4c727f7c8771cc2c06e06dd.jpg](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4ac2cac638664236ab7b4465bd25f76d~tplv-k3u1fbpfcp-zoom-1.image)
 
@@ -651,7 +651,31 @@ vue2 中双向绑定是一个指令`v-model`，可以绑定一个响应式数据
 - `select` 语法糖 `:value` + `@change`
 - 其余的都是`:value` + `@input`
 
-**自定义组件**
+**自定义组件标签中**
+
+```vue
+<NumberInput v-model="number"></NumberInput>
+
+<!-- 等同于 -->
+
+<NumberInput :value="number" @input="number=$event"></NumberInput>
+<!-- 注意： -->
+<!-- 对于原生事件，$event就是事件对象=====>能.target -->
+<!-- 对于自定义事件，$event事件就是触发事件时，所传递的数据==>不能.target -->
+
+<script>
+import NumberInput from './NumberInput'
+
+export default {
+  components: { NumberInput },
+  data() {
+    return {
+      number: 10,
+    }
+  },
+}
+</script>
+```
 
 ```vue
 <template>
@@ -696,21 +720,6 @@ export default {
 </script>
 ```
 
-```js
-;<NumberInput v-model="number"></NumberInput>
-
-import NumberInput from './NumberInput'
-
-export default {
-  components: { NumberInput },
-  data() {
-    return {
-      number: 10,
-    }
-  },
-}
-```
-
 无论是任何组件，都可以实现 `v-model`。
 
 而实现 `v-model` 的要点，主要就是以下几点：
@@ -731,7 +740,7 @@ export default {
 
   当组件初始化时从 `value` 获取一次值，并且当父组件直接修改 `v-model` 绑定值的时候，对于 `value` 的及时监听。
 
-**自定义组件改变事件名和属性名**
+**自定义组件可以改变事件名和属性名**
 
 比方有些人说我就是不想用 `props:value` 以及 `$emit('input')` ，我想换一个名字，那么此时， `model` 可以帮你实现。
 
@@ -748,7 +757,7 @@ export default {
 
 这种情况下，那就是使用 `props:number` 以及 `$emit('change')`。
 
-### .sync 语法糖，和 v-model 区别？
+### .sync 语法糖
 
 **作用**： 父子组件的双向通信
 
@@ -760,27 +769,89 @@ export default {
 **sync 传值原理:**
 
 ```html
+
+<Child :a.sync="num" :b.sync="num2"></Child>
+
+<!-- 等同于 -->
+
 <Child :a="num" @update:a="num = $event" :b="num2" @update:b="num2 = $event"> </Child>
 ```
 
-相当于多了一个事件监听，事件名是 update:a，回调函数中，会把接收到的值赋值给属性绑定的数据项中。
+相当于多了一个事件监听，事件名是 `update:a`，回调函数中，会把接收到的值赋值给属性绑定的数据项中。
 
-子组件使用`this.$emit('update:a',this.value+1)`修改接收的值 父子组件双向变化
+子组件使用`this.$emit('update:a',22)`修改接收的值 父子组件双向变化
 
-**区别**
+**和 v-model 区别？**
 
 - 相同点：都是语法糖，都可以实现父子组件中的数据的双向通信。
 
 - 区别点：
 
   - 格式不同 `v-model="num", :num.sync="num"`
-  - `v-model：  :value + @input`
-  - `:msg.sync: :msg + @update:msg`
+  - `v-model`语法糖：  `:value + @input`
+  - `:msg.sync`语法糖: `:msg + @update:msg`
   - v-model 只能用一次；.sync 可以有多个。
 
-**Vue3**
+### Vue3中 v-model
 
-vue3 中的 v-model 将 v-model 和.sync 修饰符结合起来，是`:modelValue`+ `@update：modelValue`。也可以用参数的形式指定多个不同的绑定，如`v-model：name` `v-mdoel：age`，非常强大
+用在表单元素中和vue2中的v-model的语法糖相同
+
+但是v-model用在自定义组件中，是`:modelValue`+ `@update：modelValue`的语法糖， 像是将 v-model 和.sync 修饰符结合起来。也可以用参数的形式指定多个不同的绑定，如`v-model：name` `v-model：age`，非常强大
+
+```vue
+<!-- 父组件中 -->
+<child v-model="userName"></child>
+
+<!-- 等同于 -->
+
+<Father :modelValue="userName" @update:modelValue="userName = $event"></Father>
+```
+
+```vue
+<!-- 子组件中 -->
+<template>
+  <input type="text" 
+    :value="modelValue" 
+    @input="emit('update:modelValue',$event.target.value)"
+  />
+</template>
+<script setup>
+  defineProps(['modelValue'])
+  const emit = defineEmits(['update:modelValue'])
+</script>
+```
+
+value名称可以更改，所以可以传多个
+
+```vue
+<!-- 父组件中 -->
+<child v-model:name="userName" v-model:age="userAge"></child>
+
+<!-- 等同于 -->
+
+<Father 
+  :name="userName" @update:name="userName = $event"
+  :age="userAge" @update:age="userAge = $event"
+></Father>
+```
+
+```vue
+<!-- 子组件中 -->
+<template>
+  <input type="text" 
+    :value="name" 
+    @input="emit('update:name',$event.target.value)"
+  />
+  <input type="text" 
+    :value="age" 
+    @input="emit('update:age',$event.target.value)"
+  />
+</template>
+<script setup>
+  defineProps(['name', 'age'])
+  const emit = defineEmits(['update:name','update:age'])
+</script>
+```
 
 ### Vue 的单向数据流
 
@@ -1899,20 +1970,67 @@ export function initUse(Vue: GlobalAPI) {
 
 `EventBus`  又称为事件总线。在 Vue 中可以使用  `EventBus`  来作为组件之间通讯的桥梁，是所有组件共用相同的事件中心，所有组件都可以向该中心注册发送事件或接收事件
 
-`使用`
+**使用**
+
+1. 创建事件总线实例：
+
+在你的项目中的某个文件（通常是 src/event-bus.js）中创建一个全局的 Vue 实例，用作事件总线：
 
 ```js
-// 发送消息
-EventBus.$emit(string, callback(payload1,…))
-
-// 监听接收消息
-EventBus.$on(string, callback(payload1,…))
-
-// 移除事件监听
-EventBus.$off('sendMsg')
+import Vue from 'vue';
+export const eventBus = new Vue();
 ```
 
-`缺点`
+2. 在发送组件中触发事件：
+
+在需要发送事件的组件中，通过事件总线实例触发一个事件：
+
+```js
+import { eventBus } from '@/event-bus.js';
+
+export default {
+  methods: {
+    sendData() {
+      eventBus.$emit('data-sent', this.data);
+    }
+  }
+}
+```
+
+3. 在接收组件中监听事件：
+
+在需要接收事件的组件中，通过事件总线实例监听该事件：
+
+```js
+import { eventBus } from '@/event-bus.js';
+
+export default {
+  created() {
+    eventBus.$on('data-sent', this.handleData);
+  },
+  methods: {
+    handleData(data) {
+      // 处理接收到的数据
+    }
+  }
+}
+```
+
+4. 记得清除事件监听：
+
+在组件销毁时，记得清除对事件的监听，以防止内存泄漏：
+
+```js
+export default {
+  destroyed() {
+    eventBus.$off('data-sent', this.handleData);
+  }
+}
+```
+
+通过事件总线，你可以在 Vue.js 应用程序中方便地进行组件间的通信，而无需手动在父子组件之间传递 props 或者使用回调函数。但要注意，过度使用事件总线可能会导致组件之间的耦合性增加，因此需要谨慎使用。
+
+**缺点**
 
 - 多个 eventbus,多个组件实时交互,处理逻辑复杂
 - 页面刷新了之后，与之相关的`EventBus`会被移除，这样就导致业务走不下去
@@ -1992,6 +2110,8 @@ SSR 的缺点：
 
 **概念**
 
+创建-挂载-更新-销毁过程，这边可能要说下路由的生命周期
+
 每个 Vue 组件实例都会从开始创建 -> 初始化数据 -> 编译模版 -> 挂载实例到 Dom -> 渲染、更新 -> 卸载 等⼀系列过程，称这是 Vue 的⽣命周期。
 
 生命周期的过程中会运行生命周期钩子函数，以便用户在特定的阶段去添加功能代码。Vue 的生命周期可以分为 8 个阶段： 创建前后、挂载前后、更新前后、销毁前后，以及一些特殊场景的生命周期
@@ -2066,7 +2186,7 @@ keep-alive 是 Vue 提供的一个内置组件，用来对组件进行缓存—�
 - `$attrs`与`$listeners`  是两个对象，`$attrs`  里存放的是父组件中绑定的非 Props 属性，`$listeners`里存放的是父组件中绑定的非原生事件。
 - 使用 `provide/inject`，在父组件中通过 provide 提供变量，在子组件中通过 inject 来将变量注入到组件中。不论子组件有多深，只要调用了 inject 那么就可以注入 provide 中的数据。
 - `slot插槽`
-- 使用`Vuex`进行状态管理
+- 引入`Vuex`插件进行状态管理（vue3中使用的mite插件）
 - 使用`eventBus`进行跨组件触发事件，进而传递数据(const bus = new Vue())
 
 父子组件通信: `props`/`emit+事件`; `$parent` / `$children`; `provide` / `inject` ; `ref` ; `$attrs` / `$listeners`
@@ -2074,6 +2194,8 @@ keep-alive 是 Vue 提供的一个内置组件，用来对组件进行缓存—�
 兄弟组件通信: `eventBus` ; vuex
 
 跨级通信: `eventBus`；Vuex；`provide` / `inject` 、`$attrs` / `$listeners`
+
+### v-model
 
 ### props / $emit
 
@@ -2452,6 +2574,8 @@ export default {
 - C 组件中能直接触发 test 的原因在于 B 组件调用 C 组件时 使用 v-on 绑定了`$listeners` 属性
 - 在 B 组件中通过 v-bind 绑定`$attrs`属性，C 组件可以直接获取到 A 组件中传递下来的 props（除了 B 组件中 props 声明的）
 - vue3 移除了
+
+### Slot
 
 ### eventBus 事件总线（$emit / $on）
 

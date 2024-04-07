@@ -21,22 +21,14 @@ export default defineUserConfig({
           {
             text: 'JS基础',
             link: '/js/index.md'
-            // 该元素将一直处于激活状态
-            // activeMatch: '/',
           },
           {
             text: '设计模式',
-            link: '/js/设计模式.md',
-            // 该元素在当前路由路径是 /foo/ 开头时激活
-            // 支持正则表达式
-            activeMatch: '^/js/设计模式'
+            link: '/js/设计模式.md'
           },
           {
             text: '数据结构和算法',
-            link: '/js/数据结构和算法.md',
-            // 该元素在当前路由路径是 /foo/ 开头时激活
-            // 支持正则表达式
-            activeMatch: '^/js/数据结构和算法'
+            link: '/js/数据结构和算法.md'
           }
         ]
       },
@@ -54,52 +46,66 @@ export default defineUserConfig({
         link: '/engineering/',
         children: [
           {
-            text: 'webpack',
-            link: '/engineering/webpack.md'
+            text: '代码规范',
+            children: [
+              {
+                text: 'eslint',
+                link: '/engineering/standard/eslint.md'
+              },
+              {
+                text: 'prettier',
+                link: '/engineering/standard/prettier.md'
+              },
+              {
+                text: '规范搭建',
+                link: '/engineering/standard/规范搭建.md'
+              },
+              {
+                text: '语法规范',
+                link: '/engineering/standard/语法规范.md'
+              }
+            ]
           },
           {
-            text: 'eslint',
-            link: '/engineering/eslint.md'
+            text: '项目构建',
+            children: [
+              {
+                text: 'webpack',
+                link: '/engineering/webpack.md'
+              }
+            ]
           }
         ]
       },
       { text: '学习路线', link: '/studyRoute/' },
       { text: '项目', link: '/projectSolution/' },
       { text: '待写', link: '/noWrite/' },
-      { text: '前端监控', link: '/jiankong/' },
-      {
-        text: '规范',
-        link: '/standard/',
-        children: [
-          {
-            text: '代码规范',
-            link: '/standard/代码规范.md'
-          },
-          {
-            text: '发布规范',
-            link: '/standard/发布规范.md',
-            activeMatch: '^/standard/发布规范'
-          }
-        ]
-      }
+      { text: '前端监控', link: '/jiankong/' }
     ],
-    // sidebar: 'auto',
-    sidebar: {
-      '/engineering/': [
-        {
-          text: 'eslint',
-          children: ['/engineering/eslint.md']
-        },
-        {
-          text: 'prettier',
-          children: ['/engineering/prettier.md']
-        },
-        {
-          text: 'webpack',
-          collapsible: true,
-          children: ['/engineering/webpack.md']
-        }
-      ]
-    }
+    sidebar: 'auto'
+    // sidebar: {
+    //   '/html/': [
+    //     {
+    //       text: 'HTML',
+    //       children: ['/html/']
+    //     }
+    //   ],
+    //   '/css/': [
+    //     {
+    //       text: 'CSS',
+    //       children: ['/css/']
+    //     }
+    //   ],
+    //   '/engineering/': [
+    //     {
+    //       text: '代码规范',
+    //       children: ['/engineering/eslint.md', '/engineering/prettier.md']
+    //     },
+    //     {
+    //       text: '项目构建',
+    //       children: ['/engineering/webpack.md']
+    //     }
+    //   ]
+    // }
   })
 })

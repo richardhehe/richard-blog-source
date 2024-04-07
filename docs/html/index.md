@@ -1,7 +1,5 @@
 # HTML
 
-![HTML面试题.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2d1b5c4b7f5a4aa6a06dcd6156b871e0~tplv-k3u1fbpfcp-zoom-1.image)
-
 ## WEB标准以及W3C
 
 Web标准简单来说可以分为结构、表现、行为。

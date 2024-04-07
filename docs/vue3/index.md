@@ -1,3 +1,7 @@
+## 非兼容性改变
+
+[看迁移文档](https://v3-migration.vuejs.org/zh/breaking-changes/)
+
 ## 为什么要升级 Vue3
 
 - `代码维护问题`： options Api 新增或者修改一个需求，需要分别在 data，methods，computed 里修改，当应用变大之后，造成代码以维护
@@ -167,6 +171,8 @@ _createElementBlock('div', null, []) => _createElementBlock(_Fragment, null, [])
 
 #### Teleport
 
+背景：使用position：fixed定位的时候不一定会定位准确，比如存在滤镜filter：saturate（）等属性的时候
+
 Teleport 组件的作用主要将组件的内容渲染到DOM树中的任意位置，Teleport 其实就是 React 中的 Portal
 
 我们可以使用 `teleport`  组件，通过 `to`  属性，将弹出框、tooltip 等组件渲染的位置与`<div id="app"></div>`  同级，也就是在  `body` 下。这在处理弹出框、模态框等场景时非常有用。
@@ -184,6 +190,8 @@ Suspense的主要作用是优化组件的加载体验，可以使用它在页面
 使用`<Suspense>`标签将要异步加载的组件包裹起来，通过v-slot指令分别设置了默认插槽和回退插槽。在回退插槽中，你可以自定义展示的回退内容，例如显示一个加载中的提示。
 
 `<Suspense>` 接受两个插槽：#default 和 #fallback。它将在内存中渲染默认插槽的同时展示后备插槽内容。
+
+Suspense还在实验性中，后期随时可能变化
 
 或者在 vue2.x 中使用`vue-async-manager`
 
@@ -652,6 +660,19 @@ export default {
 - `Ref` 返回响应式 `Ref` 对象，访问和修改值需要通过 `.value` 属性，在模板中使用会自动解包，不需要`.value`
 - `Ref` 内部封装一个 `Reflmpl` 类，使用访问器属性 `get/set` 进行数据劫持和更新，从而实现响应式
 
+**注意**
+
+reactive中的ref不用使用.value，reactive会自动解包
+
+```js
+let obj = {
+  a:1,
+  b:2,
+  c: ref(3)
+}
+obj.c = 4 // 不用写.value
+```
+
 ### toRef 和 toRefs
 
 toRef 和 toRefs 是用于创建响应式引用的辅助函数。它们可以将一个响应式对象的属性转换为一个响应式引用，在经过处理后就可以进行解构赋值的操作，避免在模板中频繁使用 .value 进行访问。
@@ -822,7 +843,28 @@ Vue.directive('highlight', {
 
 ### 组件传值变化
 
-```js
+```ts
+// 子组件接收
+<script lang="ts" setup name="Person">
+  import {withDefaults} from 'vue'
+  import {type Persons} from '@/types'
+
+  // 只接收list
+  // defineProps(['list'])
+
+  // 接收list + 限制类型
+  // defineProps<{list:Persons}>()
+
+  //  接收list + 限制类型 + 限制必要性 + 指定默认值
+  withDefaults(defineProps<{list?:Persons}>(),{
+    list:()=> [{id:'ausydgyu01',name:'康师傅·王麻子·特仑苏',age:19}]
+  })
+  // 接收list，同时将props保存起来
+  /* let x = defineProps(['list'])
+  console.log(x.list) */
+</script>
+
+// 之前的方式
 export default {
   props: ["test"],
   emits: ["updateTest"],
@@ -851,7 +893,7 @@ export default {
 }
 ```
 
-### 全局 API 调用方式变化
+### 全局 API 转移到应用对象
 
 在 Vue 2.x 中，大部分全局 API 都是通过 Vue.xxx 或者 Vue.abc() 方式调用，而在 Vue 3 中，这些方式将会改变，取而代之的是如下
 
@@ -859,7 +901,12 @@ export default {
 import { createApp } from 'vue'
 const app = createApp({})
 app.mixin()
-app.use()
+app.use() // 注册插件
+app.components()
+app.mount() // 注册应用
+app.unmount() // 卸载应用
+app.directive()
+app.config
 ...
 ```
 
@@ -871,13 +918,10 @@ nextTick(() => {})
 onMounted(() => {})
 ```
 
-由于 Vue 3 中全局 API 都会通过 app.xxx 的方法调用，所以之前通过 Vue.prototype.xxx 绑定的全局方法和变量将无法使用，可以采用如下方式来代替：
+由于 Vue 3 中全局 API 都会通过 app.xxx 的方法调用，所以vue2中通过 Vue.prototype.xxx 绑定的全局方法和变量将无法使用，可以采用如下方式来代替：
 
 ```js
 app.config.globalProperties.http = function () {}
-
-//在vue组件中：
-this.http()
 ```
 
 ### 根实例初始化
@@ -1007,9 +1051,70 @@ emitter.emit('foo', { a: 'b' })
 
 ## Pinia
 
+- state
+- getters
+- action
+
 Pinia 是 Vue 的专属的最新状态管理库，是 Vuex 状态管理工具的替代品
 
-1. 提供更加简单的 API(去掉了 mutation)
+1. 提供更加简单的 API(去掉了 mutation) ，组件中可直接修改store的数据，无需再提交mutation
+
+```ts
+// 组件中修改store数据
+import {useCountStore} from '@/store/count'
+
+const countStore = useCountStore()
+// 直接修改
+function add() {
+  // 1. 第一种修改方式
+  countStore.sum += 1
+
+  // 2. 第二种修改方式，修改多个数据
+  countStore.$patch({
+    sum: 222,
+    address: '北京'
+  })
+
+  // 3.第三种修改方式，调用对应action
+  countStore.incrementOdd(n.value)
+}
+
+```
+
+```ts
+// Pinia
+
+import { defineStore } from 'pinia'
+
+export const useCountStore = defineStore('count', {
+  actions: {
+    //加
+    increment(value:number) {
+      if (this.sum < 10) {
+        //操作countStore中的sum
+        this.sum += value
+      }
+    },
+  },
+  state() {
+    return {
+      sum: 1,
+      address: '苏州'
+    }
+  }
+})
+
+```
+
 2. 提供符合组合式风格的 API(和 Vue3 新语法统一)
-3. 去掉了 modules 的概念，每一个 store 都是一个独立的模块
-4. 搭配 TypeScript 一起使用提供可靠的类型推断
+4. 去掉了 modules 的概念，每一个 store 都是一个独立的模块
+5. 搭配 TypeScript 一起使用提供可靠的类型推断
+
+## setup 中能不能访问到data和methods中的数据
+
+setup执行时机在data和methods之前，所以能读取到，但是data和methods读取不到setup中定义的数据
+
+## 宏函数在vue3中不用引入直接使用
+
+- defineExpose()
+- defineProps()
