@@ -1,5 +1,3 @@
-![计算机网络面试题.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f12461279ce9455dac3ff6e818f0e1ab~tplv-k3u1fbpfcp-zoom-1.image)
-
 ## 一、HTTP协议
 
 ### 1. http协议的理解
@@ -40,14 +38,14 @@ HTTP协议是用于传输超文本（即HTML）的应用层协议，默认使用
 - `空行`： 请求头之后是一个空行，通知服务器以下不再有请求头
 - `请求体`：包括请求的数据，如表单数据、JSON数据等，GET没有请求体
 
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/a6a5aac1a897413d8be4f11147f20522~tplv-k3u1fbpfcp-watermark.image?)
+![image.png](./img/WX20240409-194444.png)
 **响应报文**
 
 - `响应⾏/状态行`：包括HTTP版本、状态码和状态消息
 - `响应头`：包括如服务器的类型、响应的内容类型等。
 - `响应体`：包括响应的数据，如HTML页面、JSON数据等。
 
-![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/8d5a91d0e3794c66bd77f06abe1f25b0~tplv-k3u1fbpfcp-watermark.image?)
+![image.png](./img/WX20240409-194459.png)
 
 ### 3. HTTP请求方法
 
@@ -69,7 +67,7 @@ HTTP协议是用于传输超文本（即HTML）的应用层协议，默认使用
 - **是否缓存：** 因为两者应用场景不同，GET请求会被浏览器主动缓存，而POST不会，除非手动设置。
 - **参数类型：** GET只能发送ASCII字符，而POST可以发送任意类型的数据。
 - **发送的报文格式：** get请求没有请求体，post有请求体，必须设置请求头
-![image.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4dc8f0bfa0134167b2a0d4c254c9b420~tplv-k3u1fbpfcp-watermark.image?)
+![image.png](./img/WX20240409-195215.png)
 
 ### 5. POST和PUT请求的区别
 
@@ -92,7 +90,7 @@ HTTP 1.1(1997年)相对于HTTP 1.0(1996年)来说更加高效、灵活和安全�
     这导致了很多的网页优化技巧，比如合并脚本和样式表、将图片嵌入 CSS 代码、域名分片(domain sharding)等等。如果 HTTP 协议设计得更好一些，这些额外的工作是可以避免的。
 
 - **缓存方面：** HTTP 1.0 强缓存使用 `Expires` 标头来指定资源的过期时间，协商缓存使用`Last-Modified`标记最后一次资源文件修改的时间。HTTP 1.1 强缓存使用 `Cache-Control` 标头来控制缓存的行为，如 max-age、no-cache、no-store。协商缓存使用`Etag`给资源文件进行唯一标识
-- **管道化**（HTTP Pipelining）：HTTP/1.1支持管道化（HTTP Pipelining），即客户端可以在一个TCP连接上同时发送多个请求，而不需要等待之前的响应，这样可以更好地利用网络带宽和资源，提高性能。
+- **管道化**（HTTP Pipelining）：HTTP/1.1支持管道化（HTTP Pipelining），即客户端可以在一个TCP连接上同时发送多个请求，这样可以更好地利用网络带宽和资源，提高性能。但是同一个 TCP 连接里面，所有的数据通信是按次序进行的。服务器只有处理完一个回应，才会进行下一个回应。要是前面的回应特别慢，后面就会有许多请求排队等着。这称为队头堵塞(Head-of-line blocking)
 - **新增host 字段:** 用来指定服务器的域名。`http1.0` 中认为每台服务器都绑定一个唯一的 `IP` 地址，因此，请求消息中的 URL 并没有传递主机名（hostname）。但随着虚拟主机技术的发展，在一台物理服务器上可以存在多个虚拟主机，并且它们共享一个IP地址。因此有了 host 字段，这样就可以将请求发往到同一台服务器上的不同网站。
 - **带宽优化**，在 `http1.0`中，存在一些浪费带宽的现象，例如客户端只是需要某个对象的一部分，而服务器却将整个对象送过来了，并且不支持断点续传功能。`http1.1` 则在请求头引入了 `range` 头域，它允许只请求资源的某个部分，即返回码是 `206（Partial Content`），这样就方便了开发者自由的选择以便于充分利用带宽和连接。
 - **请求方法:** `http1.1`新增了很多请求方法，如 `PUT`、`HEAD`、`OPTIONS` 等。
@@ -542,7 +540,7 @@ DNS 服务器中以资源记录的形式存js储信息，每一个 DNS 响应报
 
 `ISO`为了更好的使网络应用更为普及，推出了`OSI`参考模型。
 
-![image](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/dcec91b0dd8d4ffbbfdc19b7419c86ac~tplv-k3u1fbpfcp-zoom-1.image)
+![image](./img/WX20240409-193138.png)
 
 **（1）应用层**
 
@@ -588,9 +586,7 @@ DNS 服务器中以资源记录的形式存js储信息，每一个 DNS 响应报
 
 `TCP/IP`五层协议和`OSI`的七层协议对应关系如下：
 
-![image](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/87d92f9d233f46b8bcd1d65f887fbccc~tplv-k3u1fbpfcp-zoom-1.image)
-
-![image](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/abc355d25b1343ae935ea2f902ed7fd8~tplv-k3u1fbpfcp-zoom-1.image)
+![alt](./img/WX20240409-193524.png)
 
 - **应用层 (application layer)** ：直接为应用进程提供服务。应用层协议定义的是应用进程间通讯和交互的规则，不同的应用有着不同的应用层协议，如 HTTP协议（万维网服务）、FTP协议（文件传输）、SMTP协议（电子邮件）、DNS（域名查询）等。
 - **传输层 (transport layer)** ：有时也译为运输层，它负责为两台主机中的进程提供通信服务。该层主要有以下两种协议：
@@ -604,15 +600,15 @@ DNS 服务器中以资源记录的形式存js储信息，每一个 DNS 响应报
 
 在每一层都工作着不同的设备，比如我们常用的交换机就工作在数据链路层的，一般的路由器是工作在网络层的。
 
-![image](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f228782f0b144ed3919a84438f66d457~tplv-k3u1fbpfcp-zoom-1.image)
+![image](./img/WX20240409-193614.png)
 
 在每一层实现的协议也各不同，即每一层的服务也不同，下图列出了每层主要的传输协议：
 
-![image](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c3ca591f556f4b279d2e0f7c4a732fc5~tplv-k3u1fbpfcp-zoom-1.image)
+![image](./img/WX20240409-193802.png)
 
 同样，`TCP/IP`五层协议的通信方式也是对等通信：
 
-![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/353fd92bda75499a8de0233fa2c55b4c~tplv-k3u1fbpfcp-zoom-1.image)
+![image](./img/WX20240409-193856.png)
 
 ## 六、TCP与UDP---了解即可
 

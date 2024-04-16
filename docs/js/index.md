@@ -1,5 +1,3 @@
-![JavaScript面试题.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/59e524c3ccfd4f20ba96266f70829d10~tplv-k3u1fbpfcp-zoom-1.image)
-
 ## 一、数据类型
 
 ### JavaScript 有哪些数据类型，区别
@@ -102,7 +100,7 @@ function getType(target) {
 }
 ```
 
-![img](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6816dda154e54369aa98aeef1cebf220~tplv-k3u1fbpfcp-zoom-1.image)
+![img](./img/WX20240410-144347.png)
 
 稳健地判断 JavaScript 数据类型方式，可以符合预期的判断基本数据类型 String、Undefined 等，也可以判断 Array、Object 这些引用数据类型
 
@@ -644,7 +642,7 @@ Sum(100)
 - `数组使用Array.prototype.concat()`: 将多个数组合并为一个数组
 - `数组使用Array.prototype.slice()`
 
-  `Object.assign()`和`展开运算符...`如果对象的属性值为基础类型，对于拷贝的那个属性值而言就是深拷贝。如果对象的属性值为引用类型，对于拷贝的那个值就是浅拷贝的 
+  `Object.assign()`和`展开运算符...`如果对象的属性值为基础类型，对于拷贝的那个属性值而言就是深拷贝。如果对象的属性值为引用类型，对于拷贝的那个值就是浅拷贝的
 
   ```js
   function clone(target) {
@@ -787,12 +785,53 @@ export function loginAPI(paramsList) {
 
 **new 操作符的执行过程：**
 
-- 首先创建了一个新的空对象
-- this 指向这个对象（会执行构造函数的代码，为这个新对象添加属性）
-- 绑定原型，将实列 this 的原型指向构造函数的 prototype
-- 判断构造函数的返回值类型，如果是值类型，返回创建的对象。如果是引用类型，就返回这个引用类型的对象。
+- 首先创建了一个空对象
+- 让构造函数的 `this` 指向这个空对象，执行构造函数的代码（为这个新对象添加属性）
+- 绑定原型，将空对象的原型设置为构造函数的 `prototype` 对象。
+- 如果构造函数没有显式返回一个对象，则返回这个新创建的对象
 
-![微信截图_20221129211808.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/84de0bdeea1a44c6b870c79156af09f6~tplv-k3u1fbpfcp-watermark.image?)
+举例
+
+```js
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+}
+
+// 使用new操作符创建一个Person对象
+var person1 = new Person('John', 30);
+
+console.log(person1.name); // 输出: John
+console.log(person1.age);  // 输出: 30]
+```
+
+在上面的例子中，Person 是一个构造函数，通过 new 操作符创建了一个名为 person1 的新对象。在执行 new Person('John', 30) 时，会做以下操作：
+
+1. 创建一个空对象 `var obj = {}`。
+2. 将 `Person.prototype` 连接到 `obj` 的原型链上，即 `obj.__proto__ = Person.prototype`。
+3. 执行 `Person` 构造函数，将 this 绑定到新创建的空对象 obj 上，所以 this.name = name; 和 this.age = age; 会将属性添加到 obj 对象上。
+4. 如果构造函数没有返回一个对象，即没有显式使用 return 语句返回一个对象，那么 new 操作符会返回这个新创建的对象 obj。
+5. 需要注意的是，new 操作符在 JavaScript 中实际上是一个语法糖，它隐藏了上述步骤的实现细节。在实际开发中，使用 new 操作符创建对象实例非常常见。
+
+手写new操作符
+
+```js
+// 简易
+function myNew(constructor, ...args) {
+  // 1. 创建一个空对象
+  const obj = {};
+
+  // 2. 将空对象的原型指向构造函数的原型
+  obj.__proto__ = constructor.prototype;
+
+  // 3. 调用构造函数，将 this 指向新创建的对象，并传入参数
+  const result = constructor.apply(obj, args);
+
+  // 4. 如果构造函数内部返回了对象，则返回该对象，否则返回新创建的对象
+  return typeof result === "object" && result !== null ? result : obj;
+}
+
+```
 
 ### JavaScript 脚本延迟加载的方式
 
@@ -1185,6 +1224,63 @@ console.log(encodedQuery);
 - unescape()这个方法用来将使用 escape() 方法编码的字符串解码
 - 注意，escape 方法已经被废弃，并不建议在新的代码中使用。
 
+### base64编码方式
+
+1. 使用浏览器内置的btoa()和atob()函数：
+
+btoa()函数用于创建一个基于Base64编码的ASCII字符串，由一个二进制数据的"字符串"表示。这意味着你需要先将数据转换为某种二进制格式（通常是Uint8Array），然后再使用btoa()。同样，atob()函数用于解码一个先前由btoa()创建的Base64编码的字符串。
+
+```js
+let str = "Hello, world!";  
+let base64 = btoa(unescape(encodeURIComponent(str)));  
+console.log(base64);  // 输出: "SGVsbG8sIHdvcmxkIQ=="  
+  
+let decodedStr = decodeURIComponent(escape(atob(base64)));  
+console.log(decodedStr);  // 输出: "Hello, world!"
+```
+
+需要注意的是，btoa()和atob()只能处理拉丁字符。对于非拉丁字符（如中文），你需要先使用encodeURIComponent()和decodeURIComponent()进行编码和解码。
+
+2. 使用第三方库：
+
+如果你需要处理更复杂的情况，或者希望有更灵活的控制，你可能会想要使用第三方库。例如，js-base64库提供了一个更强大且易于使用的API。你可以通过npm安装它：
+
+```shell
+npm install js-base64
+```
+
+```js
+const Base64 = require('js-base64').Base64;  
+  
+let str = "Hello, world!";  
+let base64 = Base64.encode(str);  
+console.log(base64);  // 输出: "SGVsbG8sIHdvcmxkIQ=="  
+  
+let decodedStr = Base64.decode(base64);  
+console.log(decodedStr);  // 输出: "Hello, world!"
+```
+
+### encodeURIComponent和btoa的区别
+
+encodeURIComponent和btoa在JavaScript中都是用于编码的函数，但它们之间存在一些重要的区别：
+
+- 编码目的与范围：
+encodeURIComponent：主要用于将字符串作为URI组件进行编码。它主要针对的是URL的查询字符串参数，以确保在URL中传输的数据不会被错误地解析或截断。它会编码除ASCII字母、数字、- _ . ! ~ * ’ ( )之外的所有字符。编码后的效果是%XX或%uXXXX这种形式。
+btoa：则用于将Unicode字符串或二进制数据转换为一个Base64编码的字符串。Base64编码常用于在文本中嵌入二进制数据，确保数据在传输过程中不会被破坏。它主要关注的是将数据转换为一种可以在文本中安全传输的格式。
+- 编码后的格式：
+encodeURIComponent编码后的字符串格式是%后面跟着两位或四位十六进制数。
+btoa编码后的字符串则是由A-Z、a-z、0-9、+和/组成的Base64字符串。
+- 适用场景：
+encodeURIComponent通常用于URL参数传递的场景，当参数中包含特殊字符（如空格）时，可以确保这些字符被正确传递和解析。
+btoa则更多地用于数据的编码和解码，比如对密码进行加密，或者实现字符串的直接传输而不受特定字符集的限制。
+- 字符集处理：
+encodeURIComponent不会对ASCII字母、数字和一些标点符号进行编码。
+btoa则可以处理Unicode字符串，将其转换为Base64编码，这使得它在处理包含非ASCII字符的字符串时更为强大。
+总结来说，encodeURIComponent和btoa在编码目的、编码后的格式、适用场景以及字符集处理方面都存在差异。选择使用哪个函数取决于你的具体需求，比如你是需要编码URL参数还是需要对数据进行Base64编码
+
+### File Blob FileReader ArrayBuffer Base64
+
+![alt](./img/WX20240412-172646.png)
 
 ## 三、原型与原型链
 
@@ -1192,7 +1288,7 @@ console.log(encodedQuery);
 
 **原型**
 
-- JavaScript 中是使用构造函数来新建一个对象的，每一个构造函数的内部都有一个 prototype 属性，`构造函数.prototype`就是`显示原型`
+- JavaScript 中每一个构造函数的内部都有一个 prototype 属性，`构造函数.prototype`就是`显示原型`
 - `构造函数.prototype.constructor`指向构造函数本身
 - 使用构造函数创建一个实例，`实例.__proto__`就是隐式原型，它和`构造函数.prototype`指向同一个对象。所以`实例.__proto__` === `构造函数.prototype`。构造函数的所有实例都可以访问这个原型对象上的属性和方法
 
@@ -1201,6 +1297,8 @@ console.log(encodedQuery);
 - 当访问一个对象的属性或方法时，首先查找对象自身有没有这个属性，如果有直接返回，如果没有查找隐式原型`__proto__`上的属性
 - 如果原型上没有，就去查找原型的原型，一直查到  `Object`  内置对象为止(`原型链的尽头Object.prototype.__proto__ === null`)，这条查找的路径就是`原型链`
 - 如果最后也没找到，就是 undefined
+
+![alt](./img/WX20240410-202105.png)
 
 `用途`
 

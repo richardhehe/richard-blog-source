@@ -16,41 +16,39 @@
 
 ### RAIL性能模型
 
-RAIL是 `Response（响应）`，`Animation（动画）`，`Idle（空闲）` 和 `Load（加载）` 的首字母缩写，是一种由Google Chrome团队于2015年提出的性能模型，用于提升浏览器的用户体验和性能。
+RAIL 性能模型是一个用于衡量和优化 web 应用程序性能的框架，它由 Google 团队于2015年提出的性能模型。RAIL 模型将用户对 web 应用程序的交互分为四个主要阶段：`Response（响应）`，`Animation（动画）`，`Idle（空闲）` 和 `Load（加载）`，用于提升浏览器的用户体验和性能
 
 **Response**
 
-应该尽可能快速的响应用户的操作，应在在100ms以内响应用户输入。
+用户与网页交互时，应该尽可能快速的响应用户的操作，应在在100ms以内响应用户输入，以保持用户感觉到的流畅性和即时性。
 
 `优化方案`
 
-- 事件处理函数在50ms内完成，考虑到idle task的情况，事件会排队，等待时间大概在50ms。适用于click，toggle，starting animations等，不适用于drag和scroll。
+- 事件处理函数在50ms内完成，考虑到任务队列的情况，事件会排队，等待时间大概在50ms。适用于click，toggle，starting animations等，不适用于drag和scroll。
 - 复杂的js计算尽可能放在后台线程，如web worker，避免对用户输入造成阻塞
 - 超过50ms的响应，一定要提供反馈，比如倒计时，进度百分比等。
 
 **Animation**
 
-旨在视觉上的平滑。用户对帧率变化感知很敏感。在展示动画的时候，以每秒 60 帧的速度渲染动画，以保持流畅的视觉效果。也就是每一帧应该以16ms进行渲染。产生每一帧的时间不要超过10ms，浏览器需要用6ms来渲染每一帧。
+页面以每秒 60 帧的速度渲染动画，以保持流畅的视觉效果。也就是每一帧应该以16ms进行渲染。如果动画卡顿或掉帧，会给用户造成视觉上的不适和不良体验。
 
 `优化方案`
 
-- requestAnimationFrame 来优化动画和页面渲染的方法。通过将动画更新的代码放在 requestAnimationFrame 的回调函数中执行，可以确保动画在每次浏览器重绘之前进行更新。这样可以减少掉帧现象，使得动画更加流畅和自然。
+- `requestAnimationFrame` 来优化动画和页面渲染的方法。通过将动画更新的代码放在 `requestAnimationFrame` 的回调函数中执行，可以确保动画在每次浏览器重绘之前进行更新。这样可以减少掉帧现象，使得动画更加流畅和自然。
 
 `requestAnimationFrame` 会根据浏览器的刷新频率自动调节回调函数的执行时间。比如普通显示器60HZ它会自动对应16ms执行一次，比如高级显示器120HZ，它会自动对应9ms执行一次。它能保证回调函数在屏幕每一次的刷新间隔中只被执行一次，这样就不会引起丢帧现象。
 
-- 避免使用 JavaScript 定时器或频繁重绘页面，定时器时间不精准
+- 避免使用 `JavaScript 定时器或频繁重绘页面，定时器时间不精准(因为任务队列的存在)
 
 **Idle**
 
-在空闲时间内最大化利用资源，执行后台任务，以确保资源的高效使用。
+在用户无操作时，网页可以利用空闲时间来执行一些任务。这包括执行一些后台任务、资源的预加载、数据的预取等，以提高整体的性能和用户体验
 
 要使网站响应迅速，动画流畅，通常都需要较长的处理时间，但以用户为中心来看待性能问题，就会发现并非所有工作都需要在响应和加载阶段完成，完全可以利用浏览器的空闲时间处理可延迟的任务，只要让用户感受不到延迟即可。
 
-`Idle` 主要关注的是浏览器在没有用户输入或动画时如何合理利用空闲时间。这包括执行一些后台任务、资源的预加载、数据的预取等，以提高整体的性能和用户体验
-
 `优化方案`
 
-- 使用 `requestIdleCallback API` 空闲时间来完成一些延后的工作
+- 使用 `requestIdleCallback` 空闲时间来完成一些延后的工作
 
 ```js
 // 定义回调函数
@@ -71,7 +69,7 @@ requestIdleCallback(myIdleCallback)
 
 **Load**
 
-应该在小于1s的时间内加载完成你的网站，并可以进行用户交互。根据网络条件和硬件的不同，用户对性能延迟的理解也有所不同，在3G网络需要花费更多的时间，5s是一个更现实的目标。
+应该`5s`内内加载完成你的网站，并可以进行用户交互。根据网络条件和硬件的不同，用户对性能延迟的理解也有所不同，在3G网络需要花费更多的时间，5s是一个更现实的目标。
 
 `方案`
 
@@ -102,17 +100,13 @@ h1.setAttribute('elementtiming', 'meaningful')
 
 最大内容绘制，可视区域中最大的内容元素呈现到屏幕上的时间，用以估算页面的主要内容对用户的可见时间。`（0-2.5S 绿色）`
 
-**DCL (DomContentLoaded)** (DOM加载完成) 当 HTML 文档被完全加载和解析完成之后,DOMContentLoaded 事件被触发，无需等待样式表、图像和子框架的完成加载
-
-**L (onLoad)** 当依赖的资源全部加载完毕之后才会触发
-
 **4. FID (First Input Delay)**
 
-首次输入延迟，从用户第一次与页面进行交互到浏览器实际能够响应该交互的时间，输入延迟是因为浏览器的主线程正忙于做其他事情，所以不能响应用户，发生这种情况的一个常见原因是浏览器正忙于解析和执行应用程序加载的大量计算的JavaScript。`(0- 100ms 绿色)`
+首次输入延迟，从用户第一次与页面进行交互（例如点击按钮、选择下拉菜单等）到页面实际响应用户输入的延迟时间，输入延迟是因为浏览器的主线程正忙于做其他事情，所以不能响应用户，发生这种情况的一个常见原因是浏览器正忙于解析和执行应用程序加载的大量计算的JavaScript。`(0- 100ms 绿色)`
 
 **5. TTI (Time to Interactive)**
 
-持续可交互时间，网页第一次完全达到可交互状态的时间点，浏览器已经可以持续的响应用户的输入，完全达到可交互的状态的时间是在最后一个长任务完成的时间，并且在随后的5s内网络和主线程是空闲的。从定义上来看，中文名称叫持续可交互时间或可流畅交互时间更合适。`(0-3.8s 绿色)`
+持续可交互时间，指页面加载完成并且主线程空闲时的时间点 浏览器已经可以持续的响应用户的输入，完全达到可交互的状态的时间是在最后一个长任务完成的时间，并且在随后的5s内网络和主线程是空闲的。从定义上来看，中文名称叫持续可交互时间或可流畅交互时间更合适。`(0-3.8s 绿色)`
 
 **6. TBT (Total Block Time)**
 
@@ -123,6 +117,14 @@ h1.setAttribute('elementtiming', 'meaningful')
 累计布局位移，CLS会测量在页面整个生命周期中发生的每个意外的布局移位的所有单独布局移位分数的总和，他是一种保证页面的视觉稳定性从而提升用户体验的指标方案。`(0 - 0.1ms) 绿色`
 
 用人话来说就是当点击页面中的某个元素的时候，突然布局变了，手指点到了其它位置。比如想点击页面的链接，突然出现了一个banner。这种情况可能是因为尺寸未知的图像或者视频。
+
+  - 指定图片和媒体元素的大小： 在加载图片和媒体元素之前，为它们指定固定的大小，可以避免页面加载时元素大小变化导致的布局位移。
+  - 避免动态添加内容： 动态添加内容（例如广告、用户评论等）可能导致页面布局发生变化，从而增加 CLS。尽量在页面加载时就预留足够的空间，避免在加载过程中再动态添加内容。
+  - 使用占位符或者 Skeleton 屏： 在页面加载过程中，可以使用占位符或者 Skeleton 屏来预先占据页面布局空间，以防止页面加载过程中元素位置变化导致的布局位移。
+
+**DCL (DomContentLoaded)** (DOM加载完成) 当 HTML 文档被完全加载和解析完成之后,DOMContentLoaded 事件被触发，无需等待样式表、图像和子框架的完成加载
+
+**L (onLoad)** 当依赖的资源全部加载完毕之后才会触发
 
 ### Web Vitals性能指标
 
@@ -210,27 +212,40 @@ CDN 服务商一般会提供基于文件后缀、目录多个维度来指定 CDN
 
 缓存位置：Service Worker -> Memory Cache -> Disk Cache -> Push Cache。当以上都没有命中资源的时候才去做网络请求。
 
-**缓存策略**
+**常用的缓存策略**
 
-究竟要不要缓存，怎么判断缓存过期时间，由强缓存和协商缓存策略来决定。说一下强缓存和协商缓存。
+1. 我们经常说的强缓存和协商缓存，那么想一想在项目上，什么文件用强缓存？什么文件用协商缓存呢？那么我这里就来说一说。
 
-**现在比较成熟的【持久化缓存方案】**
+就拿前端SPA部署来说，打包过后的文件为 index.html、css、js、img 文件等，
 
-根据不同资源的不同需求特点来规划响应的缓存更新失效
+- `index.html` 应该不缓存，或者是设置 `no-cache` 的强缓存（即资源被缓存，但立即失效，下次请求会验证资源是否过期）+ 协商缓存`ETag/Last-Modified` 来验证资源缓存是否最新，保证 index.html 每次都从服务器获取最新的；
+- `js、css、img` 等静态资源文件会在`webpack`打包后生成对应的 `hash` 标识，所以这些文件可以设置一个比较长的缓存时间，比如1年；
 
-- 对与频繁变动的资源如(`index.html` )：跳过强缓存，采用协商缓存
+2. 那么 index.html 为什么不该缓存呢？
 
-  首先需要对其设置`cache-control: no-cache`使浏览器每次都请求服务器，然后配合 `ETag/Last-Modified` 来验证资源缓存是否最新。这种做法虽然不能节省请求数量，但能显著减少响应数据。
+　　因为他是应用的入口，只有加载它之后才会加载它引用的资源文件，所有要保证 index.html 不被缓存，这样你才能保证本地资源版本跟服务器一致。
 
-- 对于不常变化的资源（`css、js、图片等静态资源`）：采用强缓存，辅以协商缓存
+　　至于css、img、js等资源文件如果重新打包，那么他们的文件名也会根据内容发生变化（`contentHash`），都是不同的文件了也就不担心缓存带来的副作用了。
 
-  通常给它们的 `Cache-Control` 配置一个很长的有效期，如 `max-age=31536000(一年)`，这样浏览器之后只要请求相同的 URL 便会命中强缓存。至于资源更新，则需要在文件名(或者路径)中添加根据数据摘要算法生成的 hash 值 或 版本号等动态字符，从而达到更改引用 URL 的目的，让之前的强缓存失效。  
-  
-  而静态资源通过 `webpack` 打包后，采取在文件名后添加 hash 值的方式。只要资源内容变更了，名称中的 hash 值便不一样。
+　　也就是说 index.html，切记不要设置强缓存！！！其他资源采用强缓存 + 协商缓存。
 
-  一般我们会将静态资源都放到 CDN 以降低访问延时和减轻源站负载。当浏览器本地缓存的资源过期之后，不会直接向源站点请求资源，而是向 CDN 边缘节点请求。若 CDN 中的缓存也过期了，那就由它向源站点发出回源请求(协商缓存)来获取最新资源。
+3. 为什么是强缓存 + 协商缓存呢？
 
-- Web Storage 是浏览器提供的一种本地存储方案，包括 localStorage 和 sessionStorage。这些存储对象可以用来缓存用户的偏好设置、表单数据等，以便在页面刷新或关闭后能够恢复数据。
+　　有这么一句话：“协商缓存需要配合强缓存使用”。
+
+　　因为我们经常看到的协商缓存中，除了Last-Modified这个header，还有强缓存的相关header，因为如果不启用强缓存的话，协商缓存根本没有意义。
+
+　　其实很好理解的哈，如果不开启强缓存，本地都没任何缓存，还“协商”个P啊，只能服务器读取了
+
+🍀 html：no-cache
+
+🍀 js文件：max-age=2592000(一个月),s-maxage=86400；文件命名带版本号或指纹信息，方便及时更新。
+
+🍀 CSS文件：max-age=2592000,s-maxage=3600；文件命名带版本号或指纹信息，方便及时更新。
+
+图片：max-age=15552000；文件命名带版本号或指纹信息，方便及时更新。
+
+🍀 XHR请求： no-cache（s-maxage的优先级比max-age高。s-maxage是代理服务器的缓存时间）
 
 ### http请求优化
 
@@ -349,276 +364,7 @@ HTML 解析为 DOM Tree，CSS 解析为 CSSOM，两者再合成 Render Tree，�
 
 ## Webpack5优化
 
-### 构建速度
-
-- **HotModuleReplacement（HMR/热模块替换）**
-
-  开发时我们修改了其中一个模块代码，`Webpack` 默认会将所有模块全部重新打包编译，速度很慢。使用`HotModuleReplacement`让开发时只重新编译打包更新变化了的代码，不变的代码使用缓存，从而使更新速度更快。
-
-- **OneOf**
-
-  打包时每个文件都会经过所有 loader 处理，虽然因为 `test` 正则原因实际没有处理上，但是都要过一遍。比较慢。使用 `OneOf` 让资源文件一旦被某个 loader 处理了，就不会继续遍历了，打包速度更快。
-
-  ```js
-   module: {
-    rules: [
-      {
-        oneOf: [
-          {
-            test: /\.css$/,
-            use: ["style-loader", "css-loader"],
-          },
-          {
-            test: /\.less$/,
-            use: ["style-loader", "css-loader", "less-loader"],
-          },
-        ]
-      }
-    }
-  ```
-
-- **配置Include/Exclude缩减范围**
-
-  配置include/exclude缩小Loader对文件的搜索范围，好处是避免不必要的转译。node_modules目录的体积这么大，那得增加多少时间成本去检索所有文件啊？include/exclude通常在各大Loader里配置
-
-  ```js
-    module: {
-        rules: [{
-            exclude: /node_modules/,
-            include: /src/,
-            test: /\.js$/,
-            use: "babel-loader"
-        }]
-    }
-  ```
-
-- **cache缓存副本**
-
-  有了`cache`后，`dll`和`cache-loader`都不需要了
-
-  第一种：每次打包时 js 文件都要经过 Eslint 检查 和 Babel 编译，速度比较慢。使用 `Cache` 对 eslint 和 babel 处理的结果进行缓存，再次编译时只编译修改过的文件
-
-  ```js
-  export default {
-      // ...
-      module: {
-          rules: [{
-              // ...
-              test: /\.js$/,
-              use: [{
-                  loader: "babel-loader",
-                  options: { cacheDirectory: true }
-              }]
-          }]
-      },
-      plugins: [
-          new EslintPlugin({ cache: true })
-      ]
-  }
-  ```
-
-  第二种：配置 webpack 持久化缓存`type: 'filesystem'`, 可以设置为memory或filesystem，来缓存构建过程中的中间结果，大幅提升二次构建速度、打包速度，当构建突然中断，二次进行构建时，可以直接从缓存中拉取，可提速 90% 左右。
-
-- **Thread-loader多进程打包**
-
-  `happypack`webpack5已经弃用
-
-  我们想要继续提升打包速度，其实就是要提升 js 的打包速度，因为其他文件都比较少。而对 js 文件处理主要就是 `eslint` 、`babel`、`Terser`(webpack默认压缩js的) 三个工具，所以我们要提升它们的运行速度
-
-  Thread-loader是Webpack中一个用于多进程打包的Loader，它可以将某个Loader的执行过程放到一个单独的worker池中运行，从而加速打包过程。使用 `Thread` 多进程获取cpu多个核心处理 eslint 和 babel 任务，速度更快。使用方法是将`thread-loader`放在比较费时间的loader前面。
-
-  Webpack 5 会自动根据系统 CPU 核心数进行多进程打包，无需手动配置。但如果你需要手动配置，也可以使用 thread-loader 插件的选项来指定要启用的 worker 数量。
-
-  ```js
-  const path = require('path');
-
-  module.exports = {
-    // ...其他配置项...
-    module: {
-      rules: [
-        {
-          test: /\.js$/,
-          use: 'thread-loader', // 使用 thread-loader，开启多进程打包
-          exclude: /node_modules/
-        },
-        // ...其他 loader 配置...
-      ]
-    },
-    // ...其他配置项...
-  }
-  ```
-
-  `注意`: 每个 worker 都是一个独立的 node.js 进程，每个进程启动都有开销的(大约600ms)，所以我们只有在后期项目比较大的情况下才会使用多进程
-
-- **区分source-map类型**
-
-  `source-map`的作用是：source-map 是一种映射关系，可以将编译后的代码映射回原始代码，以方便在开发和调试过程中定位问题。在开发环境和生产环境中都可以使用 source-map。它的体积不容小觑，所以对于不同环境设置不同的类型是很有必要的
-
-    - 开发模式：devtool: eval-cheap-module-source-map
-      - 本地开发首次打包慢点没关系，因为 `eval` 缓存的原因，rebuild 会很快
-      - 开发中，我们每行代码不会写的太长，只需要定位到行就行，所以加上 `cheap`
-      - 我们希望能够找到源代码的错误，而不是打包后的，所以需要加上 `module`
-
-    - 生产模式：不要sourcemap或者`devtool: source-map`
-      - 优点：包含行/列映射
-      - 缺点：打包编译速度更慢
-
-- **优化resolve配置**
-
-  `resolve`用来配置 webpack 如何解析模块，可通过优化 resolve 配置来覆盖默认配置项，减少解析范围。
-
-  ```js
-  resolve: {
-    // alias：为模块创建别名，使您可以更方便地引用模块
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
-      'vue$': 'vue/dist/vue.esm-bundler.js',
-    },
-    // extensions：指定模块的扩展名的解析顺序。
-    // 当导入模块时没有提供扩展名时，Webpack 将按照指定的顺序解析模块
-    extensions: ['.js', '.json', '.vue'],
-    // modules：指定 Webpack 在哪些目录中寻找第三方模块。
-    // 默认情况下，Webpack 会在 node_modules 目录下寻找模块
-    modules: ['node_modules', 'src/components'],
-    ...
-  }
-  ```
-
-- **区分环境**
-
-  在开发过程中，切忌在开发环境使用生产环境才会用到的工具，如在开发环境下，应该排除 `[fullhash]`/`[chunkhash]`/`[contenthash]` 等工具。
-
-  同样，在生产环境，也应该避免使用开发环境才会用到的工具，如 webpack-dev-server 等插件。
-  
-### 优化打包体积
-
-- **打包体积分析**
-
-  借助插件 `webpack-bundle-analyzer` 分析文件的体积大小、各模块依赖关系，找出无用的依赖并卸载
-
-- **代码压缩**
-
-  - js代码压缩：webpack5 自带最新的 `terser-webpack-plugin`， 并默认就开启了多进程和缓存，无需手动安装
-  - css代码压缩： CSS代码压缩使用 `css-minimizer-webpack-plugin`，会清除无用的 CSS 代码，压缩和优化 CSS
-
-- **图片压缩**
-  
-  使用 `image-minimizer-webpack-plugin`插件对项目中图片进行压缩，体积更小，请求速度更快。（如果项目中图片都是在线链接，那么就不需要了。本地项目静态图片才需要进行压缩。）小于10kb的图片 转base64 这样体积不会大很多，但是可以减少请求次数
-
-- **开启Gzip压缩**
-  
-  开启 `gzip` 压缩都可以大大减小资源传输的大小，提高应用性能。使用 webpack 插件 `compression-webpack-plugin`，当 Webpack 打包完成后，会生成对应的 gzip 压缩文件，浏览器在请求资源时，如果支持 gzip 压缩，会自动请求对应的 gzip 压缩文件。（需要nginx开启 gzip_static on）。只要看响应头部（Response headers）中 有没有Content-Encoding: gzip这个属性即可，有代表有开启gzip压缩。
-
-- **按需引入组件库**
-
-  像 element-ui 这种组件库可以按需引入。使用 `babel-plugin-import` 插件。这个插件可以自动将组件库中的组件按需导入，可以大大减小打包后的文件大小（修改.babelrc）
-
-- **使用CDN服务**
-
-  我们公司使用的腾讯 CDN，第三方依赖使用 CDN 引入，`externals` 是用来告诉打包工具哪些模块是外部依赖，应该在运行时从外部获取而不是打包进 bundle 中
-
-- **开启Tree Shaking**
-
-  移除 JavaScript 中的没有使用上的代码，当打包的`mode`为`production`时，`webpack5`自动开启`tree-shaking`进行优化
-
-  开发时我们定义了一些工具函数库，或者引用第三方工具函数库或组件库。如果没有特殊处理的话我们打包时会引入整个库，但是实际上可能我们可能只用上极小部分的功能。这样将整个库都打包进来，体积就太大了。使用 `Tree Shaking` 剔除了没有使用的多余代码，让代码体积更小。
-
-- **Scope Hoisting**
-
-    Scope Hoisting（作用域提升）是指将模块间的多个作用域合并为一个作用域的优化技术。
-
-    在没有Scope Hoisting的情况下，Webpack会将每个模块的代码都封装在一个函数中，每个模块都有一个独立的作用域。这种方式会导致打包后的代码体积变得非常庞大，因为每个模块的代码都需要包装在一个函数内部，这样就会导致大量的重复代码。
-
-  ```js
-    // moduleA.js
-    export function foo() {
-      return 'foo';
-    }
-    // moduleB.js
-    export function bar() {
-      return 'bar';
-    }
-    // index.js
-    import { foo } from './moduleA';
-    import { bar } from './moduleB';
-    console.log(foo());
-    console.log(bar());
-    ```
-
-    Scope Hoisting通过将模块的代码合并到一个函数内部，消除重复代码，从而减少了打包后的代码体积。这个技术可以在Webpack中通过设置 `optimization.scopeHoisting` 来开启。
-
-    ```js
-    // index.js
-    function foo() {
-      return 'foo';
-    }
-    function bar() {
-      return 'bar';
-    }
-    console.log(foo());
-    console.log(bar());
-    ```
-
-    当打包的`mode`为`production`时，`webpack5`自动开启`Scope Hoisting`进行优化。由于 Scope Hoisting 需要分析出模块之间的依赖关系，因此源码必须采用 ES6 模块化语句，不然它将无法生效
-
-- **去除babel生成的辅助代码**
-
-  Babel 编译时为的每个文件都插入了辅助代码，使代码体积过大！ Babel 对一些公共方法使用了非常小的辅助代码，比如 _extend。默认情况下会被添加到每一个需要它的文件中。你可以将这些辅助代码作为一个独立模块，来避免重复引入。
-
-  引入`@babel/plugin-transform-runtime`插件: 禁用了 Babel 自动对每个文件的 runtime 注入，使所有辅助代码从插件这里引用，从而体积更小
-
-- **IgnorePlugin**
-
-  `IgnorePlugin` 是用来忽略特定的模块，不被打包进最终的 bundle 中。
-
-  在某些情况下，某些模块虽然被引用了，但实际上并不需要被打包，例如一些 polyfill 库、一些大型的依赖库等等。这时可以使用 IgnorePlugin 将这些模块忽略掉，从而减小 bundle 的体积，提高加载速度。比如 monet 的语言文件
-
-- **source-map**
-
-  生产环境可以选择不打包source-map或者选择一些轻量的source-map
-
-### 优化代码运行性能
-
-- **代码分割 Code Split**
-
-   打包代码时会将所有 js 文件打包到一个文件中，体积太大了。我们如果只要渲染首页，就应该只加载首页的 js 文件，其他文件不应该加载。
-
-   使用 `splitChunks`配置对代码进行分割成多个 js 文件，从而使单个文件体积更小，并行加载 js 速度更快。并通过 import 动态导入语法进行按需加载，达到需要使用时才加载该资源，不用时不加载资源。这也是路由懒加载的实现方式
-
-- **Preload / Prefetch**
-
-  使用`import` 动态导入来进行按需加载，加载速度有限制，比如：是用户点击按钮时才加载这个资源的，如果资源体积很大，那么用户会感觉到明显卡顿效果。使用 `Preload / Prefetch` 对代码进行提前加载，等未来需要使用时就能直接使用，从而用户体验更好。
-  
-   `Preload`只能加载当前页面需要使用的资源，`Prefetch`可以加载当前页面资源，也可以加载下一个页面需要使用的资源。它们的问题：兼容性较差
-
-- **合理使用hash值应对缓存**
-
-   使用 `contenthash` 能对输出资源文件进行命名，这样才能保证在上线后，改过的文件需要更新hash值，而没改过的文件依然保持原本的hash值，浏览器访问时没有改变的文件会命中缓存，从而达到性能优化的目
-
-  ```js
-  // webpack.base.js
-
-  output: {
-    path: path.resolve(__dirname, '../dist'),
-    // 给js文件加上 contenthash
-    filename: 'js/chunk-[contenthash].js',
-    clean: true,
-  },
-  ```
-
-- **Core-js**
-
-   我们使用 `babel` 对 js 代码进行了兼容性处理，其中使用 `@babel/preset-env` 智能预设来处理兼容性问题。它能将 ES6 的一些语法进行编译转换，比如箭头函数、扩展运算符等。但是如果是 async 函数、promise 对象、数组的一些方法（includes）等，它没办法处理。所以此时我们 js 代码仍然存在兼容性问题，一旦遇到低版本浏览器会直接报错。所以我们想要将 js 兼容性问题彻底解决
-
-   `core-js` 是专门用来做 ES6 以及以上 API 的 `polyfill`。使用 `Core-js` 对 js 进行兼容性处理，让我们代码能运行在低版本浏览器。
-
-- **PWA离线处理**
-
-   开发 Web App 项目，项目一旦处于网络离线情况，就没法访问了。我们希望给项目提供离线体验。使用 `PWA` 能让代码离线也能访问，从而提升用户体验。内部通过 Service Workers 技术实现的
-
-- **小图转base64**
-
-  样可以减少用户的http网络请求次数，提高用户的体验。webpack5中url-loader已被废弃，改用asset-module
+看webpack
 
 ## 其他优化
 
@@ -635,37 +381,79 @@ HTML 解析为 DOM Tree，CSS 解析为 CSSOM，两者再合成 Render Tree，�
 
 这个过程包括dns查询、建立tcp连接、发送首个http请求（如果使用https还要介入TLS的验证时间）、返回html文档、html文档head解析完毕。
 
-**检测白屏时间**
+### 如何检测白屏时间
 
-1. MutationObserver 监听dom节点的变化
-2. 使用 window.performance API 可以获取页面加载和渲染的性能指标
-3. 使用相关工具Performance和Lighthouse来检测页面白屏时间
-4. 监听 DOMContentLoaded 事件：DOMContentLoaded 事件在浏览器解析完所有的 HTML，并完成 DOM 树的构建后触发。可以在该事件回调中记录当前时间戳，作为白屏时间的起点
-5. 在html文档的head中所有的静态资源以及内嵌脚本/样式之前记录一个时间点，在head最底部记录另一个时间点，两者的差值作为白屏时间
+1. **MutationObserver**
 
-  ```html
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>白屏时间</title>
-        <script>
-            // 开始时间
-            window.pageStartTime = Date.now();
-        </script>
-        <link rel="stylesheet" href="">
-        <link rel="stylesheet" href="">
-        <script>
-            // 白屏结束时间
-            window.firstPaint = Date.now()
-        </script>
-    </head>
-    <body>
-        <div>123</div>
-    </body>
-  </html>
-  白屏时间 = firstPaint - pageStartTime
-  ```
+MutationObserver 是一个 JavaScript API，用于监视 DOM 树的变化。它可以异步地观察 DOM 的变动，并在变动发生时执行回调函数。MutationObserver 可以用于监测 DOM 元素的插入、删除、属性变化等情况，而且相比传统的事件监听（如 DOMSubtreeModified）具有更高的性能和更多的灵活性。
+
+在 Vue 项目中通过 MutationObserver 检测首屏白屏时间
+
+```js
+// 在 main.js 或者入口文件中引入 MutationObserver
+import Vue from 'vue';
+
+// 创建一个 MutationObserver 实例
+const observer = new MutationObserver((mutationsList, observer) => {
+    // 遍历每一个 mutation 记录
+    for(let mutation of mutationsList) {
+        // 如果有新节点添加到了文档中
+        if (mutation.type === 'childList') {
+            // 判断文档是否完全加载完成
+            if (document.readyState === 'complete') {
+                // 计算并输出白屏时间
+                const whiteScreenTime = performance.now();
+                console.log('首屏白屏时间（ms）：', whiteScreenTime);
+                // 停止 MutationObserver 监听
+                observer.disconnect();
+                break;
+            }
+        }
+    }
+})
+
+// 配置观察选项
+const config = { childList: true, subtree: true };
+
+// 启动 MutationObserver 监听，监测文档的子节点变化
+observer.observe(document, config);
+
+// 在 Vue 实例化之前，初始化 MutationObserver
+new Vue({
+  render: h => h(App),
+}).$mount('#app');
+
+```
+
+2. **window.performance API** 可以获取页面加载和渲染的性能指标
+3. **Performance和Lighthouse**
+4. **监听 DOMContentLoaded 事件**
+
+DOMContentLoaded 事件在浏览器解析完所有的 HTML，并完成 DOM 树的构建后触发。可以在该事件回调中记录当前时间戳，作为白屏时间的起点
+
+通过 DOMContentLoaded 事件检测首屏白屏时间的基本思路是在事件触发时记录当前时间，并与页面开始加载的时间进行比较，从而计算出首屏白屏时间。以下是一个示例代码，演示了如何在 Vue 项目中使用 DOMContentLoaded 事件检测首屏白屏时间：
+
+```js
+// 在 Vue 实例化之前，记录页面开始加载的时间戳
+const startTime = window.performance.now();
+
+// 添加 DOMContentLoaded 事件监听器
+document.addEventListener('DOMContentLoaded', () => {
+    // 计算白屏时间
+    const whiteScreenTime = window.performance.now() - startTime;
+    console.log('首屏白屏时间（ms）：', whiteScreenTime);
+});
+
+// Vue 实例化
+new Vue({
+  el: '#app',
+  render: h => h(App)
+});
+```
+
+在这个示例中，我们在 Vue 实例化之前记录了页面开始加载的时间戳 startTime。然后，通过 document.addEventListener 方法添加了一个 DOMContentLoaded 事件的监听器。当页面的 DOMContentLoaded 事件触发时，回调函数会被执行，我们在回调函数中计算了首屏白屏时间，并输出到控制台。
+
+需要注意的是，DOMContentLoaded 事件表示页面的 HTML 结构已经完全加载并解析完成，但并不代表页面的所有资源都已经加载完成。因此，首屏白屏时间仅仅是一个页面加载性能的指标之一，应该结合其他性能指标综合评估页面的加载情况。
 
 **白屏原因**
 
@@ -673,12 +461,14 @@ HTML 解析为 DOM Tree，CSS 解析为 CSSOM，两者再合成 Render Tree，�
 - 请求的资源文件体积是否过大
 - css 阻塞不会阻塞dom解析 但是会阻塞渲染
 
-**解决**
+### 优化白屏方案
 
-- 优化打包体积，利用 webpack Scope Hoisting、Tree Shaking、代码压缩等方式优化打包体积
+- 优化打包体积
+  1. 利用 webpack Scope Hoisting、Tree Shaking、代码压缩等方式优化打包体积
+  2. 使用 `babel-plugin-component` 插件来按需引入所需的 `Element UI` 组件，仅加载所需的组件，而不是一次性加载整个组件库
 - 减少请求的数量
   1. 使用异步组件或者 `import` 方式实现路由懒加载，将不同的路由对应的不同组件分割成不同的代码块，当路由被访问的时候才加载对应组件
-  2. 使用 `babel-plugin-component` 插件来按需引入所需的 `Element UI` 组件，仅加载所需的组件，而不是一次性加载整个组件库
+  2. svg图标合成雪碧图
 - Prefetch(预获取)首页js资源和图片资源
 - 配置合理的强缓存和协商缓存字段
 - dns预解析、CDN缓存
@@ -882,6 +672,7 @@ methods: {
   .list-item {
     padding: 10px;
     border: 1px solid #999;
+    box-sizing: border-box;
   }
   </style>
   ```

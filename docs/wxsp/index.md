@@ -117,11 +117,11 @@ app.globalData.user = 'name1'
 
 ```js
 App({
-    onLaunch() // 初始化执行，全局触发一次，比如登录，获取用户信息
-    onShow() // 监听小程序启动或切前台。
-    onHide()// 监听小程序切后台，小程序隐藏式触发
-    onError() // 小程序脚本发生错误（可以把错误的信息放进数据库）
-    onPageNotFound() // 页面不存在触发
+    onLaunch() // 初始化执行，全局触发一次，在此函数中可以获取到小程序启动参数。
+    onShow() // 监听小程序启动或切前台。可以进行页面渲染、数据请求、更新等操作。
+    onHide()// 监听小程序切后台，小程序隐藏式触发。可以保存页面数据状态，清理定时器等操作。
+    onError() // 小程序脚本发生错误，可以进行错误监控、记录错误信息等操作。
+    onPageNotFound() // 页面不存在触发，可以进行页面跳转、显示提示信息等操作。
     onUnhandledRejection() // 未处理的 Promise 拒绝事件监听函数
     onThemeChange() // 监听系统主题变化
 })
@@ -533,6 +533,11 @@ wx.requestPayment({
 }
 ```
 
+### uni-app中分包
+
+- 在对应平台的配置下添加`"optimization":{"subPackages":true}`开启分包优化
+- 在`pages.json`中配置`subpackages`
+
 #### 分包进行预加载
 
 首先我们需要了解，分包是基本功能是，在下程序打包的时候不去加载分包，然后在进入当前分包页面的时候才开始下载分包。一方面目的是为了加快小程序的响应速度。另一方面的原因是避开微信小程序本身只能上传2M的限制。
@@ -545,7 +550,7 @@ wx.requestPayment({
 
 ##### 如何配置分包预下载
 
-首先，在微信小程序的项目配置文件 app.json 中，设置 preloadRule 字段来定义需要预加载的分包。preloadRule 中，key 是页面路径，value 是进入此页面的预下载配置，每个配置有以下几项：
+首先，在微信小程序的项目配置文件 app.json 中，设置 `preloadRule` 字段来定义需要预加载的分包。preloadRule 中，key 是页面路径，value 是进入此页面的预下载配置，每个配置有以下几项：
 
 ```json
 {
@@ -591,6 +596,8 @@ wx.requestPayment({
   }
 }
 ```
+
+在上面的示例中，配置了两个分包的预加载规则，分别为 subpackageA 和 subpackageB。network 字段用于指定预加载策略，可以是 "all"、"wifi" 或 "none"，分别表示在所有网络环境下预加载、仅在 WiFi 环境下预加载或不预加载。packages 字段指定了需要预加载的分包名称。
 
 #### 独立分包
 

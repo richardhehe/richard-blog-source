@@ -588,3 +588,41 @@ process.env 中的环境变量也是字符串类型，但通常会包含更多�
 在 ES Modules 中，可以直接使用 import.meta.env 访问环境变量，例如 import.meta.env.NODE_ENV。
 在 Node.js 应用程序中，可以直接使用 process.env 访问环境变量，例如 process.env.NODE_ENV。
 总的来说，import.meta.env 和 process.env 都是用于获取环境变量的重要工具，但它们适用于不同的应用场景和环境。import.meta.env 主要用于前端开发和模块化环境，而 process.env 主要用于后端开发和整个 Node.js 应用程序。
+
+## Intersection Observer
+
+[参考](https://juejin.cn/post/7296058491289501696#heading-0)
+
+也可以使用`IntersectionObserver`替换监听scroll事件。
+
+`IntersectionObserver`可以监听目标元素是否出现在可视区域内，并异步触发监听回调，不随着目标元素的滚动而触发，性能消耗极低。
+
+`const myObserver = new IntersectionObserver(callback, options);`
+
+构造函数的返回值是一个 观察器实例 。
+IntersectionObserver 接收两个参数
+
+- callback： 可见性发生变化时触发的回调函数
+- options： 配置对象（可选，不传时会使用默认配置）
+
+IntersectionObserver 构造函数 返回观察器实例，实例携带四个方法：
+
+- observe：开始监听目标元素
+- unobserve：停止监听目标元素
+- disconnect：关闭观察器
+- takeRecords：返回所有观察目标的 IntersectionObserverEntry 对象数组
+
+```js
+const myObserver = new IntersectionObserver(() => {
+  console.log('交叉了')
+}, {
+  root: null, // 交叉的父元素， 默认为null，视口
+  rootMargin: , // 交叉视口的边界值
+  threshould: , // 0 - 1 ，为0时，刚好交叉，为1时，全部包含在视口中
+
+});
+// 开始监听
+myObserver.observe(document.querySelector(".scrollerFooter"));
+// 关闭观察器
+ myObserver.disconnect();
+```

@@ -46,6 +46,10 @@ export default defineUserConfig({
         link: '/engineering/',
         children: [
           {
+            text: '是什么',
+            link: '/engineering/index.md'
+          },
+          {
             text: '代码规范',
             children: [
               {

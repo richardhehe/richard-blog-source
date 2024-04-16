@@ -351,6 +351,51 @@ axios 封装，支持取消重复请求、请求失败重试、并发请求、�
 
 对于浏览器环境来说，Axios 底层是利用 XMLHttpRequest 对象来发起 HTTP 请求。如果要取消请求的话，我们可以通过调用 XMLHttpRequest 对象上的 abort 方法来取消请求。
 
+在Vue.js项目中使用axios发送HTTP请求时，有时需要取消请求以避免不必要的网络流量和资源浪费。下面是如何在Vue.js项目中取消axios请求的方法：
+
+1. 第一种
+
+使用CancelToken：
+
+axios提供了CancelToken的功能，用于取消正在进行的请求。首先，创建一个CancelToken实例，然后将其传递给axios请求的配置对象中。当需要取消请求时，调用CancelToken实例的cancel方法。
+
+```js
+// 创建 CancelToken 实例
+const source = axios.CancelToken.source();
+
+// 发送请求时传递 cancel token
+axios.get('/api/data', {
+  cancelToken: source.token
+}).then(response => {
+  // 处理响应
+}).catch(error => {
+  if (axios.isCancel(error)) {
+    // 请求被取消
+    console.log('Request canceled:', error.message);
+  } else {
+    // 处理其他错误
+  }
+});
+
+// 取消请求
+source.cancel('请求被取消');
+```
+
+在组件销毁时取消请求：
+在Vue组件中，通常在组件销毁时取消未完成的请求。可以在组件的beforeDestroy钩子中取消请求。
+
+```js
+beforeDestroy() {
+  this.cancelToken.cancel('组件销毁，取消请求');
+}
+```
+
+需要确保在每个组件实例中都有一个CancelToken实例，并且在销毁组件时取消请求。
+
+这些是在Vue.js项目中取消axios请求的两种常见方法。通过使用CancelToken，可以有效地取消未完成的请求，提高应用的性能和用户体验。
+
+2. 第二种
+
 ```js
 // 请求拦截器中配置
 service.interceptors.request.use(
@@ -848,3 +893,110 @@ server {
 [参考文章](https://juejin.cn/post/7325730345840066612?searchId=202403141451388C8364F5A3B798804296)
 
 ### 前端监控
+
+**背景**
+
+1. 因为不需要做业务统计，所以没有pv，uv统计，只针对稳定性做监控
+2. 开通日志服务，按写入量计费
+3. 代码错误、加载资源异常和接口错误
+
+**实现**
+
+`正常的js错误`
+
+1. 正常的同步错误，是可以被try catch给捕获到的，比如变量未定义
+2. 异步错误指的是在setTimeout等函数中发生的错误，是无法被try catch捕获到的，我们可以用window.onerror来进行处理，这个方法比try catch要强大很多
+
+`promise错误`
+
+1. 在 promise 中使用 catch 可以捕获到异步的错误，但是如果没有写 catch 去捕获错误的话 `window.onerror` 也捕获不到的，所以写 promise 的时候最好要写上 catch ，或者可以在全局加上 `unhandledrejection` 的监听，用来监听没有被捕获的promise错误。
+
+在 JavaScript 中，unhandledrejection 事件是一个全局事件，当 Promise 被 reject 且没有对应的 catch 处理程序时，就会触发该事件。这意味着如果 Promise 被 reject 了，但是没有在 Promise 链中的任何地方添加 .catch() 或 .then(undefined, handler)，那么就会触发 unhandledrejection 事件。
+
+你可以通过监听 unhandledrejection 事件来捕获这些未处理的 Promise rejection，并进行适当的处理。一般来说，处理 unhandledrejection 事件的方式是记录错误信息、发送错误报告到服务器、给用户提示等。
+
+`资源加载错误`
+
+资源加载错误指的是比如一些资源文件获取失败，可能是服务器挂掉了等原因造成的，出现这种情况就比较严重了，所以需要能够及时的处理，网路错误一般用 window.addEventListener 来捕获。
+
+`js接口错误`
+
+在axios响应拦截器中，进行上报
+
+```js
+import tracker from '../util/tracker';
+import getLastEvent from '../util/getLastEvent';
+import getSelector from '../util/getSelector';
+import formatTime from '../util/formatTime';
+export function injectJsError() {
+    //一般JS运行时错误使用window.onerror捕获处理
+    window.addEventListener('error', function (event) {
+        let lastEvent = getLastEvent();
+        if (event.target && (event.target.src || event.target.href)) {
+            tracker.send({//资源加载错误
+                kind: 'stability',//稳定性指标
+                type: 'error',//resource
+                errorType: 'resourceError',
+                filename: event.target.src || event.target.href,//加载失败的资源
+                tagName: event.target.tagName,//标签名
+                timeStamp: formatTime(event.timeStamp),//时间
+                selector: getSelector(event.path || event.target),//选择器
+            })
+        } else {
+            tracker.send({
+                kind: 'stability',//稳定性指标
+                type: 'error',//error
+                errorType: 'jsError',//jsError
+                message: event.message,//报错信息
+                filename: event.filename,//报错链接
+                position: (event.lineNo || 0) + ":" + (event.columnNo || 0),//行列号
+                stack: getLines(event.error.stack),//错误堆栈
+                selector: lastEvent ? getSelector(lastEvent.path || lastEvent.target) : ''//CSS选择器
+            })
+        }
+    }, true);// true代表在捕获阶段调用,false代表在冒泡阶段捕获,使用true或false都可以
+
+    //当Promise 被 reject 且没有 reject 处理器的时候，会触发 unhandledrejection 事件
+    window.addEventListener('unhandledrejection', function (event) {
+        let lastEvent = getLastEvent();
+        let message = '';
+        let line = 0;
+        let column = 0;
+        let file = '';
+        let stack = '';
+        if (typeof event.reason === 'string') {
+            message = event.reason;
+        } else if (typeof event.reason === 'object') {
+            message = event.reason.message;
+        }
+        let reason = event.reason;
+        if (typeof reason === 'object') {
+            if (reason.stack) {
+                var matchResult = reason.stack.match(/at\s+(.+):(\d+):(\d+)/);
+                if (matchResult) {
+                    file = matchResult[1];
+                    line = matchResult[2];
+                    column = matchResult[3];
+                }
+                stack = getLines(reason.stack);
+            }
+        }
+        tracker.send({//未捕获的promise错误
+            kind: 'stability',//稳定性指标
+            type: 'error',//jsError
+            errorType: 'promiseError',//unhandledrejection
+            message: message,//标签名
+            filename: file,
+            position: line + ':' + column,//行列
+            stack,
+            selector: lastEvent ? getSelector(lastEvent.path || lastEvent.target) : ''
+        })
+    }, true);// true代表在捕获阶段调用,false代表在冒泡阶段捕获,使用true或false都可以
+}
+function getLines(stack) {
+    if (!stack) {
+        return '';
+    }
+    return stack.split('\n').slice(1).map(item => item.replace(/^\s+at\s+/g, '')).join('^');
+}
+```
