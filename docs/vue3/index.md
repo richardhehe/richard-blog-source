@@ -649,20 +649,16 @@ export default {
 
 **reactive**
 
-- `reactive` 用于处理非基础数据类型的数据
-- `reactive` 返回响应式代理对象，直接操作对象的属性即可访问和修改
+- `reactive` 用于处理引用类型的数据，返回响应式代理对象，操作代理对象的属性即进行访问和修改
 - `reactive` 内部使用 `Proxyt` 代理传入对象并拦截该对象各种操作，从而实现响应式
-- 但是对对象进行重新赋值会丢失响应式，不可以解构、展开运算符(...) 解构后的属性丢失响应式
+- 对对象进行重新赋值会丢失响应式，不可以解构、展开运算符(...) 解构后的属性丢失响应式
 
 **ref**
 
-- `ref` 不关心数据类型，数组对象基础数据类型都可以(如果检测时对象类型数据，底层会通过 `reactive` 进行处理）
-- `Ref` 返回响应式 `Ref` 对象，访问和修改值需要通过 `.value` 属性，在模板中使用会自动解包，不需要`.value`
+- `ref` 基础数据类型和引用数据类型都可以，返回响应式 `Ref` 对象，访问和修改值需要通过 `.value` 属性，在模板中使用会自动解包，不需要`.value`
 - `Ref` 内部封装一个 `Reflmpl` 类，使用访问器属性 `get/set` 进行数据劫持和更新，从而实现响应式
-
-**注意**
-
-reactive中的ref不用使用.value，reactive会自动解包
+- 基本数据类型的值会被 `RefImpl` 直接包装，而对象和数组会被 `reactive` 转换为响应式代理，最后也会被 RefImpl 包装。
+- reactive中的 `ref` 不用使用 `.value`，reactive会自动解包
 
 ```js
 let obj = {
@@ -675,7 +671,24 @@ obj.c = 4 // 不用写.value
 
 ### toRef 和 toRefs
 
-toRef 和 toRefs 是用于创建响应式引用的辅助函数。它们可以将一个响应式对象的属性转换为一个响应式引用，在经过处理后就可以进行解构赋值的操作，避免在模板中频繁使用 .value 进行访问。
+`toRef`
+
+- 根据一个响应式对象中的一个属性,创建一个响应式的 ref。
+- 同时这个 `ref` 和原对象中的属性保持同步,改变原对象属性的值这个 `ref` 会跟着改变,反之改变这个 `ref` 的值原对象属性值也会改变
+- 它接收两个参数,一个是响应式对应,另一个则是属性值,例如下面代码
+
+```js
+const count = ref({
+    a: 1,
+    b: 2
+})
+const a = toRef(count.value, 'a')
+const addCount = () => {
+    a.value++
+}
+```
+
+原理
 
 ```js
 function toRef(obj,key){
@@ -689,7 +702,20 @@ function toRef(obj,key){
 }
 ```
 
-toRefs就是将对象的每一个属性，都调用 toRef 函数
+`toRefs`它可以将一个响应式对象转成普通对象,而这个普通对象的每个属性都是响应式的 `ref`
+
+```js
+let person = reactive({
+  name:'张三',
+  age:18
+})
+let{name,age}= toRefs(person)
+
+function changeName(){name.value += ~}
+function changeAge(){age.value += 1}
+```
+
+在经过处理后就可以进行解构赋值的操作，避免在模板中频繁使用 .value 进行访问。
 
 ### watch 和 watchEffect 异同
 
@@ -698,18 +724,16 @@ toRefs就是将对象的每一个属性，都调用 toRef 函数
 
 **相同点**
 
-1. 都是监听数据的变化
+1. 都是监听响应式数据的变化
 2. 都可以手动停止监听
 3. 都有清除副作用，刷新时机和调试
 
 **不同点**
 
-就是它会自动收集依赖，不需要手动传入依赖
-
-1. watch 只追踪明确定义的数据源; watchEffect 会自动收集依赖，不需要手动传入依赖
+1. watch 只追监听确定义的数据源; watchEffect 会自动收集依赖（函数中用到哪些属性，就监听哪些属性）
 2. watch 可以在回调函数中访问到新值和旧值; watchEffect 只能获取变化后的值
 3. watch 首次不会默认自动监听，需要配置`immediate`; watchEffect 首次可以自动执行回调函类
-4. wacth 可以监听对象类型的数据; watchEffect 不行
+4. watch 可以监听对象类型的数据; watchEffect 不行
 
 如果我们不关心响应式数据变化前后的值，只是想拿这些数据做些事情，那么`watchEffect`就是我们需要的。watch 更底层，可以接收多种数据源，包括用于依赖收集的 getter 函数，因此它完全可以实现 watchEffect 的功能，同时由于可以指定 getter 函数，依赖可以控制的更精确，还能获取数据变化前后的值，因此如果需要这些时我们会使用 watch。
 
@@ -1095,7 +1119,7 @@ export const useCountStore = defineStore('count', {
         this.sum += value
       }
     },
-  },
+  }, 
   state() {
     return {
       sum: 1,
@@ -1112,7 +1136,13 @@ export const useCountStore = defineStore('count', {
 
 ## setup 中能不能访问到data和methods中的数据
 
-setup执行时机在data和methods之前，所以能读取到，但是data和methods读取不到setup中定义的数据
+setup执行时机在beforecreate之前
+
+在setup中是不能使用data和methods，因为还没初始化好
+
+由于不能再setup函数中使用data和methods，所以Vue为了避免我们错误的使用，它直接将setup函数中的this修改成undefined.
+
+setup只能同步，不能异步
 
 ## 宏函数在vue3中不用引入直接使用
 

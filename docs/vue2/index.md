@@ -13,28 +13,36 @@
 
 - MPA 多页面应用 （MultiPage Application），指有多个独立页面的应用，每个页面必须重复加载 js、css 等相关资源。页面跳转，需要整个页面资源刷新。
 
-![775316ebb4c727f7c8771cc2c06e06dd.jpg](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4ac2cac638664236ab7b4465bd25f76d~tplv-k3u1fbpfcp-zoom-1.image)
+![775316ebb4c727f7c8771cc2c06e06dd.jpg](./img/WX20240428-155259.png)
 
-### MVVM、MVC、MVP 的区别
+### MVC、MVP、MVVM 的区别
 
 [b 站视频讲解](https://www.bilibili.com/video/BV137411N7aB/?spm_id_from=333.337.search-card.all.click&vd_source=020d5331c0980b1e753ec724b75e1c89)
+[参考文章](https://juejin.cn/post/7291837510119702563?searchId=20240428162742E55ED45E5785230D9303)
 
 **定义**
 
-MVC、MVP 和 MVVM 是三种软件架构设计模式，主要通过分离关注点的方式来组织代码结构，优化开发效率。
-它们设计的目标都是为了`解决 Model 和 View 的耦合问题`。
+MVC、MVP 和 MVVM 是三种软件架构设计模式，主要通过分离关注点的方式来组织代码结构，以提高代码的可维护性、可扩展性和可重用性
+
+它们设计的目标都是为了`解决 Model 和 View 的耦合问题`
 
 早期 web1.0 没有前端的时候，web 应用都是由后端开发，所有的代码(html,css,js,java 等)都混合在一个文件，jsp 代码难以维护。后来衍生出后端 MVC，对代码进行了分层处理，典型的框架就是 Spring、Struts。web2.0，出现了 ajax，前后端开始慢慢分离，前端的 MVC 也随之而来，如 backbon.js
 
 **（1）MVC**
 
-- Model: 负责核心数据和业务逻辑，通知view层进行更新
-- view: 展示model中的数据
-- Controller： 控制器则负责响应视图的指令，并调用model层去更新数据
-
-![image.png](https://pic1.zhimg.com/80/v2-4f53da0c7e1c184381fd811fddecb9e4_720w.webp)
-
 MVC模式的重点是将应用程序分离成不同的层，从而实现更好的可维护性和可扩展性。
+
+![image.png](./img/WX20240428-164121.png)
+
+- Model: 负责业务数据管理和处理，包括增删改查，Model必须提供外部可以操作模型数据的接口，同时在数据发生变化后能够通知外部
+- view: View需要感知`Model`的变化，数据变化时，更新用户界面
+- Controller：负责响应view的用户指令，并调用Model的接口对数据进行操作
+
+最简单的MVC通信方式
+
+1. View传递信息给Controller。
+2. Controller完成逻辑后，传递信息给Model改变数据。
+3. Model将新的数据发送给View，修改界面。
 
 `缺点`
 
@@ -44,10 +52,17 @@ MVC模式的重点是将应用程序分离成不同的层，从而实现更好�
 
 因为 AngulaJs 早早的将 MVVM 框架模式带入了前端，所以 MVP 模式在前端开发并不常见，但是在安卓等原生开发中，开发者还是会考虑到它
 
-MVP 模式与 MVC 唯一不同的在于 `Presenter` 和 Controller。
-Presenter 可以理解为一个中间人，它负责 View 和 Model 之间的数据流动，防止 View 和 Model 之间直接交流，导致代码混乱。Presenter 负责和 Model 进行双向交互，还和 View 进行双向交互。
+MVP 模式与 MVC 唯一不同的在于 `Presenter` 和 Controller。Presenter 可以理解为一个中间人，它负责 View 和 Model 之间的数据流动，防止 View 和 Model 之间直接交流，导致代码混乱。Presenter 负责和 Model 进行双向交互，还和 View 进行双向交互。
 
-![22.png](../img/vue2/mvp.png)
+![22.png](./img/WX20240428-165215.png)
+
+MVP的工作流程
+
+1. 用户对界面进行操作，触发View的相关事件；
+2. View感知这些事件，通知Presenter进行处理；
+3. Presenter处理相关业务，并通过Model的接口对业务数据进行更新；
+4. Model数据变化会通知Presenter；
+5. Presenter收到Model数据变化通知后，调用View暴露的接口更新用户界面。
 
 `缺点`
 
@@ -58,13 +73,13 @@ Presenter 可以理解为一个中间人，它负责 View 和 Model 之间的数
 MVVM 分为 Model、View、ViewModel：
 
 - Model 代表数据模型，数据和业务逻辑都在 Model 层中定义
-- View 代表 UI 视图，负责数据的展示
+- View 负责数据的展示，不包含任何业务逻辑
 - ViewModel 负责监听 Model 中数据的改变并且控制视图的更新，处理用户交互操作
 
 ![image.png](../img/vue2/MVVM.png)
 
-- viewModel 通过实现一套数据响应式机制来实现 Model 中数据变化触发视图更新，通过事件监听响应 View 中用户交互修改 Model 中数据。
-- MVVM 模式在前端领域有广泛应用，它不仅解决 MV 耦合问题，还解决了维护两者映射关系的大量繁杂代码和 DOM 操作代码导致页面渲染性能降低,加载速度变慢的问题，提高开发效率和性能
+- `viewModel` 通过响应式机制来实现 `Model` 中数据变化触发视图更新，通过事件监听响应 View 中用户交互修改 Model 中数据。
+- 它不仅解决 MV 耦合问题，还解决了维护两者映射关系的大量繁杂代码和 DOM 操作代码，提高开发效率和性能
 
 **Vue 是不是 MVVM 框架？**
 
@@ -73,12 +88,9 @@ Vue 是借鉴了 MVVM 的思想，但是不是严格符合 MVVM，因为 MVVM �
 ### Vue 的优缺点
 
 - 轻量级框架：大小只有几十 `kb`
-- 渐进式：可以选择性使用 Vuex components 等功能
-- 双向数据绑定：保留了 `angular` 的特点，在数据操作方面更为简单；
 - 组件化：保留了 `react` 的优点，在构建单页面应用方面有着独特的优势；
-- 视图，数据，结构分离：使数据的更改更为简单，只需要操作数据就能完成相关操作；
+- MVVM思想：视图，数据，结构分离，使数据的更改更为简单，只需要操作数据就能完成相关操作；
 - 虚拟 DOM：`dom` 操作是非常耗费性能的，不再使用原生的 `dom` 操作节点，极大解放 `dom` 操作
-- 运行速度更快：相比较于 `react` 而言，同样是操作虚拟 `dom`，就性能而言， `vue` 存在很大的优势。
 
 缺点：单页面不利于 seo，不支持 IE8 以下，首屏加载时间长
 
@@ -87,10 +99,8 @@ Vue 是借鉴了 MVVM 的思想，但是不是严格符合 MVVM，因为 MVVM �
 **相似之处：**
 
 - 都将注意力集中保持在核心库，而将其他功能如路由和全局状态管理交给相关的库；
-- 都有自己的构建工具，能让你得到一个根据最佳实践设置的项目模板；
-- 都使用了 Virtual DOM（虚拟 DOM）提高重绘性能；
-- 都有 props 的概念，允许组件间的数据传递；
-- 都鼓励组件化应用，将应用分拆成一个个功能明确的模块，提高复用性。
+- 都使用了 Virtual DOM（虚拟 DOM）提高重绘性能；vue编译template，React编译jsx
+- 组件化，并都有 props 的概念，允许组件间的数据传递；
 
 **不同之处 ：**
 

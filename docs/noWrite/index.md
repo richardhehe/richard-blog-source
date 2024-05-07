@@ -626,3 +626,193 @@ myObserver.observe(document.querySelector(".scrollerFooter"));
 // 关闭观察器
  myObserver.disconnect();
 ```
+
+### 前端跨标签页通信的方案
+
+在前端实现跨标签页通信的方案有几种，常见的包括：
+
+使用LocalStorage或SessionStorage：
+
+将数据存储在LocalStorage或SessionStorage中，不同标签页可以共享同一份存储数据。当一个标签页修改存储的数据时，其他标签页可以监听Storage事件来实时获取数据变化。
+使用BroadcastChannel API：
+
+BroadcastChannel API允许在同一浏览器内的不同标签页之间建立通信通道，可以发送和接收消息。通过BroadcastChannel发送的消息将在所有订阅了相同通道的标签页中被接收到。
+使用PostMessage API：
+
+PostMessage API允许在不同窗口、标签页或iframe之间发送消息，实现跨源通信。你可以通过调用window.postMessage方法来发送消息，同时在接收方窗口监听message事件来接收消息。
+使用SharedWorker：
+
+SharedWorker是一种在多个浏览器上下文之间共享的Web Worker。可以将SharedWorker作为中间层，在不同标签页之间传递消息。
+使用WebSocket：
+
+WebSocket是一种在浏览器和服务器之间进行全双工通信的协议。可以通过建立WebSocket连接，在不同标签页之间传递消息。
+选择哪种方案取决于具体的需求和场景。LocalStorage和SessionStorage简单易用，但是性能可能不如其他方案。BroadcastChannel和PostMessage适用于同一浏览器内不同标签页之间的通信，而WebSocket则适用于不同设备或浏览器之间的通信。
+
+### React Native、Weex和Flutter比较，选择哪个跨平台框架？
+
+性能
+
+***
+
+React Native：
+
+React Native通过构建原生组件等技术，可以优化性能，使应用程序更加流畅。此外，React Native还使用一些先进的技术，例如异步渲染和预加载组件等，以确保应用程序的性能。
+
+在对比测试中，React Native的性能表现出色，在CPU资源几乎不占用的情况下可以展现出相当流畅的滚动效果，根据我们的实际测试数据，我们发现React Native的性能优于Weex，略逊于Flutter。总结来说，如果您需要一个高性能和高质量的跨平台应用程序，React Native可以是一个不错的选择，特别是用于需要较高交互性、较高渲染性能的场景，例如在线视频应用和游戏开发等。
+
+Weex：
+
+Weex采取了一种不同的方法来优化性能，这种方法是将组件放置在独立的线程中以进行渲染。这种方法可以确保应用程序的整体流畅性，并且可以轻松处理大量UI元素。同时，Weex还具有自适应能力，可以根据设备的不同进行性能优化，这使得它在处理大量UI元素时也可以保持高效的性能。
+
+虽然Weex的流行度不及React Native和Flutter，但它在一些情况下甚至可以比其他框架表现更好。例如，阿里巴巴使用Weex来构建其阿里旅行应用程序，该应用程序在UI性能方面得到了高度认可。另外，独立开发者也可以使用Weex来开发公共组件和小型应用程序，因为它可以轻松地跨越Android和iOS。
+
+Flutter：
+
+Flutter具有非常优秀的性能表现和强大的动画库和抗锯齿技术，使得应用程序的界面非常平滑。特别是对于采用动态UI和动画等元素的应用程序，Flutter可以实现高性能和高效率。
+
+Flutter还拥有自己的渲染引擎和高效的GPU加速技术，可以控制渲染流，提高页面的渲染速度。在对比测试中，Flutter的内存消耗和启动时间也非常优秀，在许多情况下可以实现实时渲染。这使得Flutter在一些场景中甚至可以优于其他框架。
+
+开发效率
+
+***
+
+React Native：
+
+React Native的开发效率主要表现在快速开发跨平台应用上。这一点得益于其活跃的社区和大量的预构建组件，其中大部分组件都已经完成了代码编写和调试工作，开发人员只需要调用它们即可减少自己的工作量。此外，React Native还提供了很多开发工具和插件，如Reactotron，可以帮助开发人员更加方便地进行调试和开发，显著提高生产力。
+
+Weex：
+
+Weex的开发效率非常高，这主要得益于其使用Vue.js作为框架。这样开发人员可以在熟悉的技术栈下快速构建跨平台应用，并且可以在不同平台之间共享代码，这样可以大大减少开发时间和成本。此外，Weex运行在浏览器中，配合友好的调试工具，可以帮助开发人员快速发现和解决问题，这也是Weex受欢迎的一个重要因素。
+
+Flutter：
+
+Flutter具有热重载功能和Dart语言的特性，这使得开发人员可以在不重启应用程序的情况下即时查看代码更改的效果，并可以快速迭代和调试应用程序。同时，Flutter将视图和业务逻辑分离，使得开发人员可以专注于业务逻辑的开发，从而提升开发效率。
+
+社区生态
+
+React Native：
+
+React Native拥有一个庞大的社区，由众多独立开发者和公司组成，提供了很多插件和工具来支持开发者使用该框架。此外，React Native的文档和在线教程非常详尽，让开发人员能够快速上手，轻松使用该框架。同时，该框架还拥有一个活跃的社区和开发团队，能够及时修复Bug和更新版本。
+
+Weex：
+
+Weex社区生态虽然相对较小，但是也有很多贡献者，他们为Weex开发了各种插件和模板，这些插件和模板可以帮助开发人员更快地开发出高质量的应用程序。此外，Weex还提供了官方文档和在线教程，以帮助开发人员更好地了解和学习Weex的使用方法。这些资源可以帮助开发人员更快地上手Weex，提高开发效率。
+
+Flutter：
+
+Flutter作为一个Google支持的框架，有着一个庞大的社区和活跃的贡献者，这为开发者提供了强大的支持。此外，Flutter拥有充足的文档和在线教程，可帮助开发者有效地使用该框架。对于开发者遇到的问题，Flutter还有一套完善的反馈机制和问题解决途径，可以帮助开发者快速解决问题。
+
+使用场景
+
+***
+
+React Native：
+
+React Native是一种适合于构建UI重的原生应用程序的框架，它可以帮助开发人员快速迭代和实时渲染应用程序。现如今，React Native已经被Facebook、Instagram、Bloomberg等公司采用，这些公司的应用程序需要高效的UI渲染和快速的迭代。使用React Native，开发人员可以使用JavaScript编写应用程序，而不必学习Objective-C或Swift等原生语言。这使得React Native成为一种非常流行的框架，特别是对于那些想要快速构建跨平台应用程序的开发人员来说。
+
+Weex：
+
+Weex是一个非常适合用于复杂的Pixel Perfect UI的框架，因为它可以提供在各种平台上完全一致的像素布局和自适应设计。这使得开发人员可以更便捷地开发适配不同平台的应用程序，并且确保应用程序在各个平台上的用户体验一致。因此，许多大型公司如淘宝、天猫、美团等都已经开始使用Weex来构建他们的跨平台应用程序，从而加快了应用程序的开发和部署时间，并提升了用户体验。
+
+Flutter：
+
+Flutter适合于快速构建高质量、高效、高性能的应用程序。它具有自己的渲染引擎Skia和响应式编程框架，这使得大多数UI更新无需重新渲染整个UI视图，提高了应用程序的运行效率和性能。
+
+系统适配性
+
+***
+
+React Native：
+
+React Native的组件可以在多个平台上运行，并且可以与原生组件进行交互。这意味着开发人员可以使用React Native来构建具有很好系统适配性的应用程序，而无需为每个平台单独编写代码。此外，React Native还提供了许多内置的组件和API，使开发人员能够快速构建高质量的应用程序。
+
+Weex：
+
+Weex基于WebView渲染，因此可以便捷地实现跨平台UI界面。但是，由于使用WebView进行渲染，Weex可能会在某些系统上遭遇性能问题和兼容性问题，这是由于WebView本身的限制和不同系统之间的差异导致的。因此，在使用Weex时，需要考虑这些问题，并根据具体情况进行优化和调整。
+
+Flutter：
+
+Flutter使用自己的渲染引擎进行渲染，从而使得Flutter能够在不同的系统和平台上运行，并且能够适应不同的硬件和软件环境。此外，Flutter还提供了丰富的API和工具，开发者可以利用这些API和工具轻松地针对具体的平台进行适配和优化。这些API和工具包括：Flutter Widgets、Flutter Engine、Flutter Framework、Flutter SDK等等。通过这些工具，开发者可以创建出高度定制化的应用程序，并且能够在不同的平台上实现良好的性能和用户体验。
+
+总结：综合来看，React Native、Weex和Flutter都具有自身的优点和缺点。React Native具有很好的系统适配性和开发效率，Weex可以实现完美的Pixel Perfect设计，Flutter则具有优秀的性能和高效的开发方式。选择适合自己的跨平台框架需要结合自己的需求和项目特点进行综合考虑。但不管你选择哪一种框架，都需要注意它们的生态系统，这将直接关系到开发者之间的交流和知识传递。希望在本文的帮助下，你能够更好地选择合适的框架来开发您的跨平台应用程序。
+
+### 前端跨平台框架
+
+前端跨平台框架是指可以用一套代码同时构建多个平台（如Web、iOS、Android等）应用的框架或工具。以下是一些常见的前端跨平台框架：
+
+React Native：
+React Native 是由 Facebook 推出的基于 React 的跨平台移动应用开发框架，可以使用 JavaScript 和 React 的语法来开发 iOS 和 Android 应用。
+Flutter：
+Flutter 是由 Google 推出的跨平台移动应用开发框架，使用 Dart 语言编写，具有高性能和自定义UI的特点，可以同时构建 iOS、Android 和 Web 应用。
+Ionic：
+Ionic 是一个基于 Web 技术的跨平台移动应用开发框架，使用 HTML、CSS 和 JavaScript（通常配合 Angular、React 或 Vue.js）来构建移动应用，支持 iOS、Android 和 Web。
+Cordova（也称为 PhoneGap）：
+Cordova 是一个将 Web 应用打包成原生应用的工具，使用 HTML、CSS 和 JavaScript 编写应用，并通过 Cordova 提供的插件访问设备功能，支持 iOS、Android 等平台。
+NativeScript：
+NativeScript 是一个基于 JavaScript 的跨平台移动应用开发框架，使用 NativeScript 可以使用 JavaScript 或 TypeScript 构建原生移动应用，支持 iOS、Android 和 Web。
+Vue Native：
+Vue Native 是基于 Vue.js 和 React Native 的跨平台移动应用开发框架，允许开发者使用 Vue.js 的语法和组件开发移动应用，支持 iOS 和 Android。
+Weex：
+Weex 是由阿里巴巴开发的跨平台移动应用开发框架，支持使用 Vue.js 或原生 JavaScript 来构建移动应用，可以同时运行在 iOS、Android 和 Web 平台。
+这些框架和工具各有特点，开发者可以根据自己的喜好、项目需求和技术栈选择合适的跨平台框架来开发移动应用。
+
+### 多端跨平台框架(要是各平台小程序)
+
+可以开发小程序和 H5 应用的框架主要有以下几种：
+
+uni-app：
+
+uni-app 是一个基于 Vue.js 的跨平台应用开发框架，可以使用 Vue.js 的语法和组件来开发移动应用、Web 应用和各种小程序（如微信小程序、支付宝小程序、百度小程序、头条/抖音小程序等）。uni-app 提供了一套代码，可以编译生成不同平台的应用。
+
+Taro：
+
+Taro 是一个多端统一开发框架，支持使用 React、Vue 或原生 JavaScript/TypeScript 编写代码，并能编译生成小程序、H5、React Native 等多个平台的应用。Taro 提供了一套组件和 API，使得开发者可以在不同平台下进行开发和部署。
+
+MPVue：
+
+MPVue 是一个基于 Vue.js 的小程序开发框架，使用 Vue.js 的语法和组件开发小程序应用。MPVue 可以在小程序中使用 Vue.js 的特性，并支持编译生成 H5 应用。
+
+Wepy：
+
+Wepy 是一个类似 Vue.js 的小程序组件化开发框架，可以使用类 Vue.js 的语法开发小程序应用。Wepy 提供了组件化、模块化等特性，并且支持生成 H5 应用。
+
+Remax：
+
+Remax 是一个 React 开发小程序的框架，支持使用 React 的语法和组件开发小程序应用，并能编译生成小程序、H5 应用以及其他平台的应用。
+这些框架都提供了一套代码，可以同时适配小程序和 H5 平台，使得开发者可以更加高效地开发和部署应用。选择合适的框架取决于开发者的技术栈、项目需求以及对应用跨平台性的要求。
+
+### scss和sass
+
+### reduce
+
+```js
+const arr = [1,2,3,4,5]
+```
+
+`arr.reduce(callback, [initValue])`
+
+- 如果传了初始值，callback就会执行5次
+- 如果没传初始值，callback就会执行4次，会把第0项当为初始值，callback会从第一项开始执行
+
+```js
+const result = arr.reduce(function(prev, item, index) => {
+  return prev+item
+})
+```
+
+对于纯数字求和来说，传不传初始值结果都是15，但是对于复杂数据，不传初始值就会有问题：例如
+
+```js
+const arr = [
+  {id:1, name: 'zs', age: 18},
+  {id:2, name: 'zs', age: 19},
+  {id:3, name: 'zs', age: 120}
+]
+
+// 这种就必须传初始值了
+const result = arr.reduce((prev, item) => {
+  return prev + item.age
+},0)
+```
+
+### js大数运算

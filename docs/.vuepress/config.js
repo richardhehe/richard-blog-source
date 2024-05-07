@@ -35,7 +35,15 @@ export default defineUserConfig({
       { text: 'ES6', link: '/es6/' },
       { text: 'VUE2', link: '/vue2/' },
       { text: 'VUE3', link: '/vue3/' },
-      { text: '浏览器', link: '/browser/' },
+      { text: 'react', link: '/react/' },
+      {
+        text: '浏览器',
+        link: '/browser/',
+        children: [
+          { text: '浏览器基础', link: '/browser/index.md' },
+          { text: '浏览器兼容', link: '/browser/浏览器兼容性.md' }
+        ]
+      },
       { text: '计算机网络', link: '/computerNetwork/' },
       { text: '性能优化', link: '/performance/' },
       { text: '手写代码', link: '/writeCode/' },
