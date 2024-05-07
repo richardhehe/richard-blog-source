@@ -25,7 +25,7 @@ git commit -m "自动部署"
 # 如果发布到 https://<USERNAME>.github.io/<REPO>
 # git push -f git@github.com:<USERNAME>/<REPO>.git master:gh-pages
 
-git push -f https://github.com/richardhehe/richard-blog.github.io.git main:main
+git push -f https://github.com/richardhehe/richard_blog.git main:main
 
 cd -
 rm -rf docs/.vuepress/dist
@@ -34,4 +34,4 @@ git init
 git add -A
 git commit -m "源码推送"
 # git push -f https://gitee.com/zhuquanyu/richard-blog-source.git main:main
-git push -f https://github.com/richardhehe/richard-blog-source.git main:main
+git push -f https://github.com/richardhehe/richard_blog_source.git main:main
