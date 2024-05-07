@@ -15,7 +15,9 @@ cd docs/.vuepress/dist
 git init
 git add -A
 git commit -m "自动部署"
-git push -f https://gitee.com/zhuquanyu/richard-blog.git main:main
+
+# 部署到gitee
+# git push -f https://gitee.com/zhuquanyu/richard-blog.git main:main
 
 # 如果发布到 https://<USERNAME>.github.io
 # git push -f git@github.com:<USERNAME>/<USERNAME>.github.io.git master
@@ -23,10 +25,13 @@ git push -f https://gitee.com/zhuquanyu/richard-blog.git main:main
 # 如果发布到 https://<USERNAME>.github.io/<REPO>
 # git push -f git@github.com:<USERNAME>/<REPO>.git master:gh-pages
 
+git push -f https://github.com/richardhehe/richard-blog.github.io.git main:main
+
 cd -
 rm -rf docs/.vuepress/dist
 
 git init
 git add -A
 git commit -m "源码推送"
-git push -f https://gitee.com/zhuquanyu/richard-blog-source.git main:main
+# git push -f https://gitee.com/zhuquanyu/richard-blog-source.git main:main
+git push -f https://github.com/richardhehe/richard-blog-source.git main:main
